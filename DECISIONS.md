@@ -217,6 +217,16 @@ Format and rules: see "Question your reasoning" in `CLAUDE.md`. "UNVERIFIED" mea
 - Simpler option considered: manual Lighthouse runs only. Not repeatable.
 - Verdict: adopt.
 
+## D-029: Public pages build without database secrets, and prerender in Node  (2026-10-18, phase 1)
+- What and why:
+  - The staging build failed because the admin middleware loaded the Supabase secrets on import. That would also have failed CI, which has no secrets.
+  - The secrets are now optional at build time. `supabaseForRequest()` throws if a live request needs them and they're missing.
+  - Prerendering in Node removes a Wrangler warning about the already-flattened staging environment. Static pages use no Cloudflare bindings.
+- Evidence: @astrojs/cloudflare `prerenderEnvironment` option (https://docs.astro.build/en/guides/integrations-guide/cloudflare/), and the staging build log of 2026-10-18.
+- Cost: prerendered pages don't run in workerd, so any page that needs a binding must render on demand.
+- Simpler option considered: putting secrets in CI. That puts secrets where they aren't needed.
+- Verdict: adopt.
+
 ## D-019: Brand tokens copied verbatim into `design/brand-tokens.json`  (2026-10-18, phase 0)
 - What and why: the owner asked to import tokens directly, not re-derive them. The guide exposes its own token object.
 - Evidence: SAHA brand guide v1.0, section 11 (https://claude.ai/artifact/Gsy32cPwyDA38hCybEFtFG).

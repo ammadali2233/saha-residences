@@ -7,6 +7,9 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from 'astro:env/server';
  * the browser never receives a Supabase key or talks to Supabase directly.
  */
 export function supabaseForRequest(request: Request, cookies: AstroCookies) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be set as Worker secrets (see docs/RUNBOOK.md)');
+  }
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {

@@ -21,12 +21,16 @@ export default defineConfig({
   adapter: cloudflare({
     // Optimize images at build time only (D-001): no runtime image binding or cost.
     imageService: 'compile',
+    // Static pages use no Cloudflare bindings, so prerender them in Node (D-029).
+    prerenderEnvironment: 'node',
   }),
   integrations: [preact(), sitemap({ filter: (page) => !PRIVATE.test(new URL(page).pathname) })],
   env: {
     schema: {
-      SUPABASE_URL: envField.string({ context: 'server', access: 'secret' }),
-      SUPABASE_ANON_KEY: envField.string({ context: 'server', access: 'secret' }),
+      // Optional at build time: prerendered public pages never touch the database.
+      // src/lib/supabase.ts fails loudly if a request needs them and they're missing.
+      SUPABASE_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      SUPABASE_ANON_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       APP_ENV: envField.enum({ context: 'server', access: 'public', values: ['local', 'staging', 'production'], default: 'local' }),
     },
   },
