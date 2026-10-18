@@ -1,6 +1,10 @@
 -- Proves the roles and permissions matrix (docs/phase-0-plan.md section 5) against seeded sample data.
 begin;
 create extension if not exists pgtap with schema extensions;
+-- On hosted projects the CLI connects as a temporary login role without access to `extensions`;
+-- run as postgres throughout, and return to postgres (not the login role) after each role switch.
+set local role postgres;
+set local search_path = public, extensions;
 select plan(34);
 
 -- ---------------------------------------------------------------- fixtures (as postgres)
@@ -64,7 +68,7 @@ select throws_ok(
 select throws_ok(
   $$select public.staff_set_booking_status('00000000-0000-4000-c000-000000000005', 'checked_out')$$,
   '42501', null, 'anon cannot change a booking status');
-reset role;
+set local role postgres;
 
 -- ---------------------------------------------------------------- admin
 set local role authenticated;
@@ -84,7 +88,7 @@ select lives_ok($$update public.bookings set deleted_at = now() where id = '0000
 select is((select count(*) from public.audit_log where row_id = '00000000-0000-4000-c000-000000000007' and action = 'update'),
   1::bigint, 'the soft delete is in the audit log with the old and new row');
 select throws_ok($$update public.audit_log set actor = null$$, '42501', null, 'nobody can edit the audit log');
-reset role;
+set local role postgres;
 
 -- ---------------------------------------------------------------- staff
 set local role authenticated;
@@ -100,7 +104,7 @@ select lives_ok($$select public.staff_set_booking_status('00000000-0000-4000-c00
   'staff can check a guest out');
 select throws_ok($$select public.staff_set_booking_status('00000000-0000-4000-c000-000000000008', 'cancelled')$$,
   '42501', null, 'staff cannot cancel a booking');
-reset role;
+set local role postgres;
 
 -- ---------------------------------------------------------------- partner
 set local role authenticated;
@@ -109,7 +113,7 @@ select is((select count(*) from public.capital_contributions), 1::bigint, 'partn
 select is_empty('select * from public.bookings_ops', 'partner cannot read bookings');
 select is_empty('select * from public.guests', 'partner cannot read guest details');
 select is_empty('select * from public.expenses', 'partner cannot read individual expenses');
-reset role;
+set local role postgres;
 
 select * from finish();
 rollback;
