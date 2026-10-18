@@ -63,6 +63,8 @@ export default function BookingForm(props: Props) {
   const [blocked, setBlocked] = useState<Set<string>>(new Set());
   const [loadError, setLoadError] = useState(false);
   const [month, setMonth] = useState(today.slice(0, 7));
+  // Direction of the last month change, so the grid slides the way the guest moved (motion: state 400ms).
+  const [monthDir, setMonthDir] = useState<0 | 1 | -1>(0);
   const [focusKey, setFocusKey] = useState(today);
   const [formError, setFormError] = useState<string | null>(null);
   const started = useRef(false);
@@ -140,6 +142,7 @@ export default function BookingForm(props: Props) {
     const d = new Date(Date.UTC(y, m - 1 + n, 1));
     const next = toKey(d).slice(0, 7);
     if (next < firstMonth || next > lastMonth) return;
+    setMonthDir(n > 0 ? 1 : -1);
     setMonth(next);
     setFocusKey(next === firstMonth ? today : `${next}-01`);
   };
@@ -149,14 +152,21 @@ export default function BookingForm(props: Props) {
     const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
     if (!(e.key in moves) && e.key !== 'PageUp' && e.key !== 'PageDown') return;
     e.preventDefault();
+    keyboardNav.current = true;
     let next = e.key === 'PageUp' ? addDays(focusKey, -28) : e.key === 'PageDown' ? addDays(focusKey, 28) : addDays(focusKey, moves[e.key]);
     if (next < today) next = today;
     setFocusKey(next);
-    if (next.slice(0, 7) !== month) setMonth(next.slice(0, 7));
+    if (next.slice(0, 7) !== month) {
+      setMonthDir(next > focusKey ? 1 : -1);
+      setMonth(next.slice(0, 7));
+    }
   }
+  // Keyboard moves keep focus on the day, even when the month grid re-renders for its slide transition.
+  const keyboardNav = useRef(false);
   useEffect(() => {
-    if (gridRef.current?.contains(document.activeElement)) {
-      gridRef.current.querySelector<HTMLButtonElement>(`[data-day="${focusKey}"]`)?.focus();
+    if (keyboardNav.current || gridRef.current?.contains(document.activeElement)) {
+      gridRef.current?.querySelector<HTMLButtonElement>(`[data-day="${focusKey}"]`)?.focus();
+      keyboardNav.current = false;
     }
   }, [focusKey, month]);
 
@@ -201,7 +211,7 @@ export default function BookingForm(props: Props) {
             <button type="button" class="nav" onClick={() => shiftMonth(1)} disabled={month >= lastMonth} aria-label="Next month">›</button>
           </div>
           <div class="dow" aria-hidden="true">{DAYS_SHORT.map((d) => <span>{d}</span>)}</div>
-          <div class="days" role="group" aria-label={`${MONTHS[m - 1]} ${y}`} ref={gridRef} onKeyDown={onGridKey}>
+          <div key={month} class={`days${monthDir === 1 ? ' slide-next' : monthDir === -1 ? ' slide-prev' : ''}`} role="group" aria-label={`${MONTHS[m - 1]} ${y}`} ref={gridRef} onKeyDown={onGridKey}>
             {cells.map((k, i) => {
               if (!k) return <span key={`pad-${i}`} />;
               const s = dayState(k);
@@ -270,12 +280,12 @@ export default function BookingForm(props: Props) {
               {q.lines.map((l) => (
                 <div>
                   <dt>{l.key === 'nights' ? `${formatMoney(l.unitMinor, q.currency)} × ${q.nights} ${q.nights === 1 ? 'night' : 'nights'}` : `Extra bedding: ${q.extraBeddings} × ${q.nights} ${q.nights === 1 ? 'night' : 'nights'} at ${formatMoney(l.unitMinor, q.currency)}`}</dt>
-                  <dd>{formatMoney(l.amountMinor, q.currency)}</dd>
+                  <dd key={`${l.amountMinor}${q.currency}`} class="tick">{formatMoney(l.amountMinor, q.currency)}</dd>
                 </div>
               ))}
               <div class="nofee"><dt>Cleaning and platform fees</dt><dd>None</dd></div>
-              <div class="total"><dt>Total ({q.currency}), paid at check-in</dt><dd>{formatMoney(q.totalMinor, q.currency)}</dd></div>
-              <div class="deposit"><dt>Security deposit to confirm ({props.depositPct}%), returned after checkout</dt><dd>{formatMoney(q.depositMinor, q.currency)}</dd></div>
+              <div class="total"><dt>Total ({q.currency}), paid at check-in</dt><dd key={`${q.totalMinor}${q.currency}`} class="tick">{formatMoney(q.totalMinor, q.currency)}</dd></div>
+              <div class="deposit"><dt>Security deposit to confirm ({props.depositPct}%), returned after checkout</dt><dd key={`${q.depositMinor}${q.currency}`} class="tick">{formatMoney(q.depositMinor, q.currency)}</dd></div>
             </dl>
             {converts && <p class="hint">Converted at PKR {pricing!.usdPkrRate} per USD{pricing!.usdPkrRateSetOn ? `, our rate on ${shortDate(pricing!.usdPkrRateSetOn)}` : ''}.</p>}
           </>

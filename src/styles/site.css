@@ -13,8 +13,7 @@
 
 body { font-family: var(--font-sans); }
 img { max-width: 100%; height: auto; }
-.has-sticky-bar { padding-bottom: var(--sticky-bar-height); }
-@media (min-width: 1024px) { .has-sticky-bar { padding-bottom: 0; } }
+.has-booking-bar { padding-bottom: 88px; }
 
 .skip-link { position: absolute; left: var(--space-4); top: -100px; z-index: 100; background: var(--color-charcoal); color: var(--color-stone); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); }
 .skip-link:focus { top: var(--space-4); }
@@ -60,6 +59,7 @@ p { margin: 0; }
 .prose p, .prose ul { margin-top: var(--space-4); }
 .prose li + li { margin-top: var(--space-2); }
 
-.page-head { padding-top: var(--space-7); }
-.page-head h1 { margin-top: var(--space-3); }
+.page-head { padding-top: var(--space-8); }
+/* Inner pages share the redesign's oversized display type and left-weighted openings. */
+.page-head h1 { margin-top: var(--space-3); font-size: clamp(44px, 8vw, 96px); line-height: 0.98; letter-spacing: -0.02em; max-width: 14ch; }
 .page-head .lede { margin-top: var(--space-4); }

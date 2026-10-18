@@ -1,0 +1,55 @@
+---
+// Room index with image reveal (signature graphic 5). A typographic list of rooms. Desktop: hovering or focusing
+// a room reveals its photo beside the list (pure CSS, :has). Phones and touch: each photo sits under its room
+// and wipes in as it scrolls into view. Every row links to that room on the floor plan.
+import { Image } from 'astro:assets';
+import { DHA_RETREAT as L } from '../content/listings';
+const [master, lounge, second, third] = L.photos;
+const rooms = [
+  { id: 'master', name: 'Master bedroom', floor: 'Upstairs', beds: 'King bed', photo: master },
+  { id: 'twin', name: 'Twin bedroom', floor: 'Upstairs', beds: 'Two single beds', photo: third },
+  { id: 'games', name: 'Games room', floor: 'Upstairs', beds: 'With a study table' },
+  { id: 'queen', name: 'Queen bedroom', floor: 'Ground floor', beds: 'Queen bed', photo: second },
+  { id: 'living', name: 'Living and dining', floor: 'Ground floor', beds: 'Curved sofa, dining table', photo: lounge },
+  { id: 'kitchen', name: 'Kitchen', floor: 'Ground floor', beds: 'Fully equipped' },
+];
+---
+<ol class="room-index">
+  {rooms.map((r, i) => (
+    <li>
+      <a href={`/stays/${L.slug}/#room-${r.id}`} class="row">
+        <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <span class="name">{r.name}</span>
+        <span class="meta">{r.floor} · {r.beds}</span>
+      </a>
+      <div class:list={['thumb', 'reveal-wipe', { first: i === 0 }]} aria-hidden="true">
+        {r.photo ? <Image src={r.photo.src} alt="" widths={[400, 700]} sizes="(max-width: 1023px) 100vw, 40vw" /> : <span class="no-photo">Photo coming</span>}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .room-index { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-charcoal); position: relative; }
+  .room-index li { border-bottom: 1px solid var(--color-line); }
+  .row { display: grid; grid-template-columns: 2.5rem 1fr; column-gap: var(--space-3); padding: var(--space-4) 0; color: var(--color-charcoal); text-decoration: none; }
+  .num { grid-row: 1 / 3; font-size: 13px; color: var(--color-muted); padding-top: 0.6em; }
+  .name { font-family: var(--font-display); font-size: clamp(30px, 5vw, 56px); line-height: 1.05; }
+  .meta { font-size: 14px; color: var(--color-muted); margin-top: var(--space-1); }
+  .thumb { margin: 0 0 var(--space-5) calc(2.5rem + var(--space-3)); }
+  .thumb :global(img), .no-photo { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+  .no-photo { background: var(--color-stone-200); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--color-muted); }
+
+  @media (min-width: 1024px) and (hover: hover) {
+    .room-index { width: 54%; }
+    .thumb { position: absolute; top: 0; left: calc(100% + 6%); width: 78%; margin: 0; opacity: 0; clip-path: inset(0 0 100% 0); pointer-events: none; animation: none !important; }
+    .thumb.first, .row:hover + .thumb, .row:focus-visible + .thumb { opacity: 1; clip-path: inset(0 0 0 0); }
+    .room-index:has(.row:hover, .row:focus-visible) .thumb.first:not(:is(.row:hover + .thumb, .row:focus-visible + .thumb)) { opacity: 0; clip-path: inset(0 0 100% 0); }
+    .row { transition: padding-left var(--motion-state) var(--ease-settle), color var(--motion-micro) var(--ease-settle); }
+    .row:hover, .row:focus-visible { padding-left: var(--space-3); }
+    .room-index:has(.row:hover) .row:not(:hover) { color: var(--color-muted); }
+  }
+  @media (min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .thumb { transition: opacity var(--motion-state) var(--ease-settle), clip-path var(--motion-reveal) var(--ease-settle); }
+  }
+</style>

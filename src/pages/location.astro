@@ -1,76 +1,52 @@
 ---
+// Location (redesign: concept C's drive-time map). Area only: the exact pin is shared after confirmation.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WhatsAppCta from '../components/WhatsAppCta.astro';
-import Icon from '../components/Icon.astro';
+import DriveTimeMap from '../components/DriveTimeMap.astro';
 import { DHA_RETREAT as L } from '../content/listings';
-import { SITE } from '../content/site';
+import { whatsappLink } from '../content/site';
 import { breadcrumbLd } from '../lib/seo';
-
-// Area-level map only: the exact pin is shared after confirmation (CLAUDE.md). Loads on click (D-018).
-const mapQuery = encodeURIComponent(`${SITE.area}, ${SITE.city}, ${SITE.country}`);
-const mapsLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 ---
 <BaseLayout
   title="Location: DHA Phase 9 Town, Lahore, near the airport"
-  description="DHA Retreat is in DHA Phase 9 Town, Lahore: about 25 minutes from Allama Iqbal International Airport and 15 minutes from Dolmen Mall and DHA Raya. Drive times and the area."
+  description="DHA Retreat is in DHA Phase 9 Town, Lahore: about 25 minutes from Allama Iqbal International Airport and 15 minutes from Dolmen Mall and DHA Raya. A drive-time map of the area."
   jsonLd={[breadcrumbLd([{ name: 'Location', url: new URL(Astro.url.pathname, Astro.site) }])]}
 >
-  <div class="container page-head">
-    <span class="eyebrow">Location</span>
-    <h1>DHA Phase 9 Town, Lahore</h1>
-    <p class="lede">{L.name} is in DHA Phase 9 Town, a residential part of DHA Lahore. The airport is about 25 minutes away by car, and DHA's shopping areas about 15.</p>
-  </div>
+  <section class="open" aria-labelledby="loc-title">
+    <p class="eyebrow">DHA Phase 9 Town, Lahore</p>
+    <h1 id="loc-title">Twenty-five minutes from the airport.</h1>
+    <p class="lede">{L.name} sits in a residential part of DHA Lahore, with Dolmen Mall and DHA Raya about fifteen minutes away and Gulberg about thirty.</p>
+  </section>
 
-  <div class="container section grid">
-    <section class="stack-4" aria-labelledby="drive">
-      <h2 id="drive">Drive times from the house</h2>
-      <ul class="list-rows">
-        {L.nearby.map((n) => <li><span>{n.place}</span><span class="muted">{n.time}</span></li>)}
-      </ul>
-      <p class="caption">Approximate times by car outside rush hour. <mark class="placeholder">[PLACEHOLDER: confirm drive times]</mark></p>
-    </section>
+  <section class="band map" aria-label="Drive times from the house">
+    <DriveTimeMap />
+  </section>
 
-    <section class="stack-4" aria-labelledby="map">
-      <h2 id="map">Map</h2>
-      <div class="map" data-map-query={mapQuery}>
-        <Icon name="map-pin" size={32} />
-        <p>We show the area here and send the exact location once your booking is confirmed.</p>
-        <button type="button" class="btn btn-secondary" data-load-map>Show the area on a map</button>
-        <a class="text-link" href={mapsLink} rel="noopener">Open in Google Maps</a>
-      </div>
-    </section>
-  </div>
-
-  <div class="container section prose">
-    <h2>Getting here</h2>
-    <p>Most guests arrive by car or ride-hailing from Allama Iqbal International Airport. <mark class="placeholder">[PLACEHOLDER: airport pickup available? price?]</mark></p>
-    <h2>The area</h2>
-    <p><mark class="placeholder">[PLACEHOLDER: two or three sentences on the neighbourhood in the owner's words: what's walkable, nearby grocery shops, mosques, parks]</mark></p>
-  </div>
-
-  <div class="section container">
-    <WhatsAppCta title="Need directions or a pickup?" />
-  </div>
-<script>
-  // Loads the third-party map only when the guest asks for it.
-  const box = document.querySelector<HTMLElement>('[data-map-query]');
-  box?.querySelector('[data-load-map]')?.addEventListener('click', () => {
-    const frame = document.createElement('iframe');
-    frame.src = `https://www.google.com/maps?q=${box.dataset.mapQuery}&output=embed`;
-    frame.title = 'Map of DHA Phase 9 Town, Lahore';
-    frame.loading = 'lazy';
-    frame.referrerPolicy = 'no-referrer-when-downgrade';
-    box.replaceChildren(frame);
-  }, { once: true });
-</script>
-
+  <section class="band notes" aria-labelledby="notes-title">
+    <h2 id="notes-title" class="visually-hidden">Getting here and the area</h2>
+    <div class="note">
+      <h3>Getting here</h3>
+      <p>Most guests come by car or ride-hailing from Allama Iqbal International Airport. <mark class="placeholder">[PLACEHOLDER: airport pickup available? price?]</mark></p>
+    </div>
+    <div class="note">
+      <h3>The area</h3>
+      <p><mark class="placeholder">[PLACEHOLDER: two or three sentences on the neighbourhood in the owner's words: what's walkable, nearby grocery shops, mosques, parks]</mark></p>
+    </div>
+    <div class="note">
+      <h3>Directions</h3>
+      <p>Once your booking is confirmed we send the exact location on WhatsApp. <a class="link-draw" href={whatsappLink('Hello, could you help with directions to DHA Retreat?')} data-event="whatsapp_click">Ask us on WhatsApp</a></p>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .grid { display: grid; gap: var(--space-7); }
-  @media (min-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; align-items: start; } }
-  .grid h2 { font-size: var(--type-h3-size); line-height: var(--type-h3-line); }
-  .map { aspect-ratio: 4 / 3; background: var(--color-stone-200); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); padding: var(--space-5); text-align: center; }
-  .map p { max-width: 36ch; color: var(--color-muted); }
-  .map :global(iframe) { width: 100%; height: 100%; border: 0; border-radius: var(--radius-md); }
+  .open { max-width: var(--container-wide); margin: 0 auto; padding: var(--space-7) var(--gutter) var(--space-6); }
+  .open > * + * { margin-top: var(--space-4); }
+  .open h1 { font-size: clamp(48px, 9vw, 120px); line-height: 0.95; letter-spacing: -0.02em; max-width: 12ch; }
+  .band { max-width: var(--container-wide); margin: 0 auto; padding: var(--space-7) var(--gutter); }
+  .map { background: var(--color-stone-50); max-width: none; }
+  .map > :global(*) { max-width: var(--container-wide); margin: 0 auto; }
+  .notes { display: grid; gap: var(--space-6); }
+  @media (min-width: 768px) { .notes { grid-template-columns: repeat(3, 1fr); } }
+  .note h3 { font-family: var(--font-sans); font-size: var(--type-h6-size); letter-spacing: var(--type-h6-tracking); text-transform: uppercase; font-weight: 500; color: var(--color-walnut); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-charcoal); margin-bottom: var(--space-3); }
+  .note a { color: var(--color-charcoal); font-weight: 500; }
 </style>

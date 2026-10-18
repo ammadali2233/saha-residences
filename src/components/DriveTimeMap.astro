@@ -1,0 +1,98 @@
+---
+// Drive-time map (signature graphic 2, from concept C). Rings are minutes by car; routes draw out from the house
+// as the map scrolls into view and each time appears as its line arrives. Directions are a sketch, not geography:
+// the exact pin stays private until a booking is confirmed. The list beside it carries the same data for everyone.
+import { DHA_RETREAT as L } from '../content/listings';
+import { SITE } from '../content/site';
+
+// Rough compass sketch per place (degrees, 0 = east, clockwise). Replace with real bearings when the owner confirms.
+const ANGLE: Record<string, number> = {
+  'DHA 9 Town Park': -150,
+  'DHA Raya and Fairways Commercial': -40,
+  'Dolmen Mall': 25,
+  '2F2F Formula Karting': 160,
+  'Allama Iqbal International Airport': -95,
+  'Neon Square': 95,
+  'Gulberg and MM Alam Road': -160,
+};
+const SHORT: Record<string, string> = {
+  'DHA Raya and Fairways Commercial': 'DHA Raya',
+  '2F2F Formula Karting': '2F2F Karting',
+  'Allama Iqbal International Airport': 'Airport',
+  'Gulberg and MM Alam Road': 'Gulberg',
+};
+const R = (min: number) => 40 + min * 7.2;
+const places = L.nearby.map((n, i) => {
+  const min = Number.parseInt(n.time, 10);
+  const r = R(min);
+  const a = ((ANGLE[n.place] ?? i * 51) * Math.PI) / 180;
+  const x = 300 + r * Math.cos(a);
+  const y = 300 + r * Math.sin(a);
+  const bend = (i % 2 ? 1 : -1) * r * 0.18;
+  const cx = 300 + (r / 2) * Math.cos(a) - bend * Math.sin(a);
+  const cy = 300 + (r / 2) * Math.sin(a) + bend * Math.cos(a);
+  const right = Math.cos(a) >= 0;
+  return {
+    name: n.place, label: SHORT[n.place] ?? n.place, min, x, y, i,
+    lx: x + (right ? 12 : -12), anchor: right ? 'start' : 'end',
+    d: `M300 300 Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`,
+  };
+});
+const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${SITE.area}, ${SITE.city}`)}`;
+---
+<div class="map-wrap">
+  <svg class="time-map draw-on-scroll" viewBox="-90 0 780 600" role="img" aria-labelledby="dtm-title">
+    <title id="dtm-title">Sketch of drive times from DHA Retreat. The list beside it gives each place and time.</title>
+    {[10, 20, 30].map((m) => (
+      <>
+        <circle class="ring" cx="300" cy="300" r={R(m)} />
+        <text class="ring-lbl" x={300 + R(m) + 4} y="296">{m} min</text>
+      </>
+    ))}
+    {places.map((p) => (
+      <g class="route" style={`--i:${p.i}`}>
+        <path class="pen draw-line" pathLength="1" d={p.d} />
+        <circle class="pin" cx={p.x} cy={p.y} r="5" />
+        <text class="place" x={p.lx} y={p.y - 2} text-anchor={p.anchor}>{p.label}</text>
+        <text class="mins" x={p.lx} y={p.y + 18} text-anchor={p.anchor}>{p.min} min</text>
+      </g>
+    ))}
+    <g class="home"><circle cx="300" cy="300" r="16" /><text x="300" y="340">DHA Retreat</text></g>
+  </svg>
+  <div class="legend">
+    <ul class="times">
+      {[...places].sort((a, b) => a.min - b.min).map((p) => <li><span>{p.name}</span><span class="m">{p.min} min</span></li>)}
+    </ul>
+    <p class="fine">Approximate drive times outside rush hour. Directions on the sketch are not to scale. <mark class="placeholder">[PLACEHOLDER: confirm times and add landmarks]</mark></p>
+    <a class="link-draw maps" href={mapsLink} rel="noopener">Open the area in Google Maps</a>
+    <p class="fine">We send the exact address and pin once your booking is confirmed.</p>
+  </div>
+</div>
+
+<style>
+  .map-wrap { display: grid; gap: var(--space-6); }
+  @media (min-width: 1024px) { .map-wrap { grid-template-columns: 7fr 4fr; align-items: center; } }
+  .time-map { width: 100%; height: auto; max-width: 680px; overflow: visible; }
+  .pen { fill: none; stroke: var(--color-walnut); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .ring { fill: none; stroke: var(--color-line-strong); stroke-width: 1; stroke-dasharray: 2 6; vector-effect: non-scaling-stroke; }
+  .ring-lbl { font-family: var(--font-sans); font-size: 12px; fill: var(--color-muted); }
+  .pin { fill: var(--color-charcoal); }
+  .place { font-family: var(--font-display); font-size: 20px; fill: var(--color-charcoal); }
+  .mins { font-family: var(--font-sans); font-size: 14px; fill: var(--color-walnut); font-weight: 500; }
+  .home circle { fill: var(--color-walnut); }
+  .home text { font-family: var(--font-sans); font-size: 14px; font-weight: 500; text-anchor: middle; fill: var(--color-charcoal); }
+  @media (max-width: 767px) { .place { font-size: 24px; } .mins, .home text { font-size: 20px; } .ring-lbl { font-size: 18px; } }
+  .times { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-charcoal); }
+  .times li { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-line); }
+  .times .m { color: var(--color-walnut); font-weight: 500; white-space: nowrap; }
+  .maps { display: inline-block; margin-top: var(--space-5); color: var(--color-charcoal); font-weight: 500; }
+  .fine { font-size: 13px; color: var(--color-muted); margin-top: var(--space-2); }
+
+  /* Routes draw out one after another; each time appears as its line arrives. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .route .draw-line { animation-range: entry calc(10% + var(--i) * 4%) cover calc(30% + var(--i) * 4%) !important; }
+      .route .mins, .route .pin { animation: motion-fade linear both; animation-timeline: view(); animation-range: cover calc(28% + var(--i) * 4%) cover calc(34% + var(--i) * 4%); }
+    }
+  }
+</style>

@@ -9,6 +9,7 @@ import { breadcrumbLd } from '../../lib/seo';
   title="Book DHA Retreat directly"
   description="Check availability for DHA Retreat in DHA Phase 9, Lahore, see the full price in USD or PKR, and send a booking request. No platform fees. 20% security deposit to confirm."
   jsonLd={[breadcrumbLd([{ name: 'Book', url: new URL(Astro.url.pathname, Astro.site) }])]}
+  bookingBar={false}
 >
   <div class="container page-head">
     <span class="eyebrow">{L.name} · {L.area}</span>
@@ -126,4 +127,17 @@ import { breadcrumbLd } from '../../lib/seo';
   }
   .field textarea { padding: var(--space-3) var(--space-4); resize: vertical; }
   .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* Booking widget motion (signature graphic 6). Never delays input: the new value is there at once and settles in. */
+  .day.end, .day.range { transition: background-color var(--motion-micro) var(--ease-settle), color var(--motion-micro) var(--ease-settle); }
+  .days { overflow: hidden; }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes tick-in { from { opacity: 0.2; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @keyframes month-next { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+    @keyframes month-prev { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+    .lines .tick { display: inline-block; animation: tick-in var(--motion-state) var(--ease-settle); }
+    .days.slide-next { animation: month-next var(--motion-state) var(--ease-settle); }
+    .days.slide-prev { animation: month-prev var(--motion-state) var(--ease-settle); }
+    .day.end { animation: tick-in var(--motion-micro) var(--ease-settle); }
+  }
 </style>

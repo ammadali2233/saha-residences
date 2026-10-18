@@ -2,7 +2,7 @@
 // Interactive floor plan (signature graphic 1). Schematic, not to scale: layout as described by the owner,
 // still to be confirmed. Without JavaScript every room's details show as a list; with it, one room at a time.
 import { Image } from 'astro:assets';
-import { DHA_RETREAT as L } from '../../content/listings';
+import { DHA_RETREAT as L } from '../content/listings';
 
 type Room = { id: string; floor: 'ground' | 'upper'; name: string; short: string; detail: string; x: number; y: number; w: number; h: number; photo?: (typeof L.photos)[number] };
 const [master, lounge, second, third] = L.photos;
@@ -31,12 +31,12 @@ const floors = [
     {floors.map((f, i) => (
       <figure class:list={['floor', 'draw-on-scroll']} data-floor={f.id} data-active={i === 0 ? 'true' : undefined}>
         <svg viewBox="0 0 600 420" role="img" aria-label={`${f.label} plan, schematic and not to scale`}>
-          <rect class="draw-line outer" x="40" y="40" width="520" height="290" pathLength="1" />
+          <path class="draw-line outer" d="M40 40 h520 v290 h-520 Z" pathLength="1" />
           {f.id === 'ground' && <rect class="porch" x="240" y="330" width="320" height="70" />}
           {f.id === 'ground' && <text class="lbl small" x="400" y="372">Car porch</text>}
           {rooms.filter((r) => r.floor === f.id).map((r) => (
             <g class="room" data-room={r.id}>
-              <rect class="draw-line" x={r.x} y={r.y} width={r.w} height={r.h} pathLength="1" />
+              <path class="draw-line" d={`M${r.x} ${r.y} h${r.w} v${r.h} h-${r.w} Z`} pathLength="1" />
               <rect class="hit" x={r.x} y={r.y} width={r.w} height={r.h} />
               <text class="lbl long" x={r.x + r.w / 2} y={r.y + r.h / 2}>{r.name.split(' and ')[0]}</text>
               <text class="lbl short" x={r.x + r.w / 2} y={r.y + r.h / 2}>{r.short}</text>
@@ -94,7 +94,18 @@ const floors = [
       g.addEventListener('click', () => show(id));
       g.addEventListener('pointerenter', (e) => { if ((e as PointerEvent).pointerType === 'mouse') show(id); });
     });
-    floor('upper');
+    // Deep links from the room index (/stays/dha-retreat/#room-queen) open the right floor and room.
+    const fromHash = () => {
+      const id = location.hash.replace('#room-', '');
+      const btn = plan.querySelector<HTMLButtonElement>(`[data-room-btn="${id}"]`);
+      if (!btn) return false;
+      floor(btn.closest<HTMLElement>('[data-floor-item]')!.dataset.floorItem!);
+      show(id);
+      plan.scrollIntoView({ block: 'start' });
+      return true;
+    };
+    if (!fromHash()) floor('upper');
+    addEventListener('hashchange', fromHash);
   }
 </script>
 

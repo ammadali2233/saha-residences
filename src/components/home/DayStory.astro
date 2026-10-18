@@ -1,13 +1,12 @@
 ---
-// Concept B, "A day at DHA Retreat": the page moves from morning to night. The hero knows the time in Lahore;
-// the chapters shift colour temperature, and a sun arc carries the power story (solar by day, UPS by night).
+// Home spine (redesign, concept B): the page moves through a day at the house. The hero knows the time in Lahore
+// (set before first paint, so nothing shifts); chapters change colour temperature, and a small sun arc on each one
+// tells the power story honestly: solar charges the backup by day, the backup covers load shedding at night.
 import { Image, Picture } from 'astro:assets';
-import ConceptLayout from '../../layouts/ConceptLayout.astro';
 import { DHA_RETREAT as L } from '../../content/listings';
 const [master, lounge, , third] = L.photos;
 ---
-<ConceptLayout letter="b" name="A day at DHA Retreat">
-  <script slot="head" is:inline>
+  <script is:inline>
     // Sets the part of day in Lahore before first paint, so the hero never flashes or shifts (no layout change).
     (function () {
       var h = +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Karachi' }).format(new Date());
@@ -15,7 +14,7 @@ const [master, lounge, , third] = L.photos;
     })();
   </script>
 
-  <section class="hero" aria-labelledby="b-title">
+  <section class="hero" aria-labelledby="home-title">
     <div class="hero-copy">
       <p class="greeting" aria-live="off">
         <span class="g-default">Morning light, quiet afternoons, evenings in.</span>
@@ -24,7 +23,7 @@ const [master, lounge, , third] = L.photos;
         <span class="g-evening">Good evening from Lahore.</span>
         <span class="g-night">It's night in Lahore. The lights are still on.</span>
       </p>
-      <h1 id="b-title">A day at DHA Retreat.</h1>
+      <h1 id="home-title">A day at DHA Retreat.</h1>
       <p class="sub">A three-bedroom house in DHA Phase 9 Town, with solar power, a caretaker on site and room for up to eight.</p>
     </div>
     <svg class="hero-sun" viewBox="0 0 360 200" aria-hidden="true">
@@ -70,7 +69,6 @@ const [master, lounge, , third] = L.photos;
       </li>
     </ol>
   </div>
-</ConceptLayout>
 
 <style>
   /* ---------------- hero: tinted by the time in Lahore (set before paint) ---------------- */
@@ -125,7 +123,7 @@ const [master, lounge, , third] = L.photos;
   .ch-img { overflow: hidden; }
   .placeholder-photo { display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-line-strong); color: var(--color-muted); font-size: 14px; background: transparent; }
   @media (min-width: 768px) {
-    .ch { grid-template-columns: repeat(12, 1fr); align-items: end; min-height: 90vh; }
+    .ch { grid-template-columns: repeat(12, 1fr); align-items: end; min-height: 80vh; }
     .ch.morning { min-height: 0; padding-top: var(--space-7); }
     .morning .ch-text { grid-column: 1 / 6; }
     .afternoon .ch-text { grid-column: 8 / 13; grid-row: 1; } .afternoon .ch-img { grid-column: 2 / 7; grid-row: 1; aspect-ratio: auto; }

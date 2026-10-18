@@ -290,6 +290,36 @@ Format and rules: see "Question your reasoning" in `CLAUDE.md`. "UNVERIFIED" mea
 - Simpler option considered: GSAP or Motion (roughly 25 to 60 KB of JS). That's not needed for anything the concepts do.
 - Verdict: adopt. Revisit only if the chosen concept needs something native can't do.
 
+## D-037: One sticky booking bar replaces repeated CTAs and the floating WhatsApp button  (2026-10-18, redesign)
+- What and why: the audit found the same booking ask in every section. One bar ("USD 60 a night · No platform fees", WhatsApp, "Check dates") is fixed on every page except Book and the thank-you page, so booking is always one tap away and nothing else needs to repeat it.
+- Evidence: redesign brief ("booking stays frictionless", avoid "Book Now buttons repeated in every section"). Booking-flow tests still pass.
+- Cost: about 64px of permanent screen on phones. Bodies get bottom padding so it never covers content.
+- Simpler option considered: header CTA only. That's not reachable mid-page on phones.
+- Verdict: adopt.
+
+## D-038: Brand guide components replaced for the redesign  (2026-10-18, redesign)
+- What and why:
+  - Hero booking bar → sticky bar.
+  - Amenity grid → particulars spec sheet.
+  - Star review card → pull quote.
+  - Trust band and WhatsApp block → one line.
+  - Photo radius → none.
+  - These guide components were the main sources of the generic look (docs/redesign/audit.md). Tokens, type, logo, buttons, inputs, date picker and voice are unchanged.
+- Evidence: owner's choice of concepts B + A + C, 2026-10-18.
+- Cost: the brand guide document still shows the old components until it's updated.
+- Simpler option considered: restyling the same components. That keeps the same structure, and the structure was the problem.
+- Verdict: adopt. The guide owner should fold these into v1.1.
+
+## D-039: Time-aware hero without hurting LCP  (2026-10-18, redesign)
+- What and why: a 0.3 KB inline script sets the part of day in Lahore on `<html>` before the hero paints. CSS picks the tint, greeting and sun position. No layout changes, no animation on the LCP elements.
+- Evidence: Lighthouse mobile home LCP 1.9 to 2.0 s, CLS 0. A test asserts the hero isn't animated.
+- Cost: four greeting strings in the HTML, three hidden. Pages served from cache still show the visitor's current time, because the script runs client-side.
+- Simpler option considered: a static hero. It loses the "today in Lahore" feeling for 0.3 KB.
+- Verdict: adopt.
+
+## D-034 update: no map embed  (2026-10-18, redesign)
+The click-to-load Google Maps iframe is replaced by the drive-time map plus an "Open the area in Google Maps" link. There's no third-party embed and no unofficial URL to depend on.
+
 ## D-019: Brand tokens copied verbatim into `design/brand-tokens.json`  (2026-10-18, phase 0)
 - What and why: the owner asked to import tokens directly, not re-derive them. The guide exposes its own token object.
 - Evidence: SAHA brand guide v1.0, section 11 (https://claude.ai/artifact/Gsy32cPwyDA38hCybEFtFG).

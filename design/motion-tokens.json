@@ -1,0 +1,24 @@
+{
+  "$source": "SAHA Residences website redesign, 2026-10-18. Addition to the brand guide v1.0 tokens (which define no motion). Implemented in src/styles/motion.css. See docs/redesign/report.md for every animation that uses them.",
+  "duration": {
+    "micro": { "value": "200ms", "use": "Hover, focus, press, colour changes. Range 150 to 250ms." },
+    "state": { "value": "400ms", "use": "State changes: price updates, calendar month, tabs, room selection, page transitions." },
+    "reveal": { "value": "800ms", "use": "Entrances of text and photos when time-based. Range 600 to 900ms." },
+    "draw": { "value": "1600ms", "use": "Time-based line drawings (decorative strokes). Scroll-linked drawings follow the scroll instead." }
+  },
+  "easing": {
+    "settle": { "value": "cubic-bezier(0.22, 1, 0.36, 1)", "use": "Default. Calm deceleration for anything arriving or revealing." },
+    "glide": { "value": "cubic-bezier(0.65, 0, 0.35, 1)", "use": "Movement between two states, such as page transitions." }
+  },
+  "choreography": {
+    "stagger": { "value": "80ms", "use": "Delay between items in a sequence (scroll ranges use about 4% per item)." },
+    "distance": { "value": "24px", "use": "The furthest anything travels on entrance." }
+  },
+  "rules": [
+    "Animate transform, opacity, clip-path and stroke-dashoffset only. Never animate layout.",
+    "The hero headline and hero photo are never animated in. The LCP element is visible on first paint.",
+    "Every animated element is fully visible without CSS support, without JavaScript and with prefers-reduced-motion.",
+    "Scroll-linked, never scroll-jacked. Nothing loops. Off-screen animations do nothing.",
+    "No animation delays booking: new values appear at once and settle in."
+  ]
+}

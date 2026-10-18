@@ -40,6 +40,9 @@ Full plan: `docs/phase-0-plan.md`. Decisions log: `DECISIONS.md`. Read both befo
 - Icons: Lucide, 2px stroke, no fills, **inlined SVG** (no CDN).
 - Photo rules: real rooms only, TVs off, no branded packaging. Text over a photo only on a flat charcoal panel or an even 45% overlay, never a gradient.
 - The Behance "Kings Hideaway" design is a layout reference only. On any conflict, the brand guide wins.
+- Redesign (2026-10-18): home = "A day at DHA Retreat" (time-aware hero, day chapters), listing = interactive floor plan, location = drive-time map. Report: `docs/redesign/report.md`. Guide components replaced: hero booking bar, amenity grid, star review card, CTA bands, photo radius (D-038). Photos are square-edged.
+- Motion: tokens in `design/motion-tokens.json` and `src/styles/motion.css`. Native CSS only (scroll-driven animations, SVG stroke, View Transitions); no animation library without a DECISIONS entry. Animate transform, opacity, clip-path and stroke-dashoffset only. Never animate the hero headline or LCP image. Everything must be fully visible with reduced motion or no JS. Nothing loops. Booking is never delayed.
+- One booking entry point: the sticky booking bar (`StickyBook`). Don't add repeated CTA bands.
 
 ## Stack and layout
 - **Astro** on **Cloudflare Workers** (`@astrojs/cloudflare`). Public pages `prerender = true`. `/admin/*`, `/api/*` and `/ical/*` render on demand.
@@ -75,7 +78,7 @@ Full plan: `docs/phase-0-plan.md`. Decisions log: `DECISIONS.md`. Read both befo
 **Performance and SEO (public pages, mobile)**
 - Lighthouse 95+ on all four categories. LCP < 2.5 s, INP < 200 ms, CLS < 0.1.
 - Images: AVIF/WebP with fallbacks, srcset, explicit width and height, lazy loading below the fold. The hero image is preloaded with `fetchpriority="high"`.
-- JavaScript on public pages is limited to the Book island, gallery lightbox, map and video facades, and the conversion beacon. No analytics on `/admin`.
+- JavaScript on public pages is limited to the Book island, gallery lightbox, video facade, floor-plan selection, the time-of-day script, the scroll-reveal fallback and the conversion beacon. No analytics on `/admin`.
 - Each page gets a unique title and meta description, one H1, logical headings and semantic landmarks. Use canonical tags, lowercase hyphenated URLs with a trailing slash, an XML sitemap of public pages only, and OG/Twitter tags.
 - JSON-LD only for content visible on the page. Allowed: WebSite, Organization, VacationRental (understanding only), BreadcrumbList. **Never** add Review, AggregateRating or FAQPage markup (Google's self-serving and FAQ rules).
 

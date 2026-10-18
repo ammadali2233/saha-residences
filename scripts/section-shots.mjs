@@ -9,7 +9,8 @@ mkdirSync(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 for (const width of [390, 1440]) {
-  const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
+  // Reduced motion shows every section in its settled state (scroll-linked reveals would be caught mid-way).
+  const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   for (const path of paths) {
     await page.goto(base + path, { waitUntil: 'networkidle' });
     // Load lazy images before shooting.

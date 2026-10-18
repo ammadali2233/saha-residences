@@ -29,10 +29,11 @@ const waText = summary
   ? `Assalam o Alaikum. I've sent booking request ${summary.ref} for ${listing?.name ?? 'DHA Retreat'}: ${stayLine}. Quoted total ${formatMoney(summary.totalMinor, summary.currency)}. Please let me know the next step.`
   : 'Hello, I sent a booking request on your website.';
 ---
-<BaseLayout title="Request received" description="Your booking request has been sent to SAHA Residences." noindex>
+<BaseLayout title="Request received" description="Your booking request has been sent to SAHA Residences." noindex bookingBar={false}>
   <div class="container-text page-head stack-5">
     {summary ? (
       <>
+        <svg class="done draw-line-host" viewBox="0 0 64 64" aria-hidden="true"><circle class="draw-line ring" cx="32" cy="32" r="29" pathLength="1" /><path class="draw-line tickmark" d="M19 33 l9 9 l17 -19" pathLength="1" /></svg>
         <span class="eyebrow">Request {summary.ref}</span>
         <h1>Thank you, {summary.name}. We have your request.</h1>
         <p class="lede">Your dates aren't held yet. Continue on WhatsApp and we'll confirm availability and send payment details for the {listing?.depositPct ?? 20}% security deposit.</p>
@@ -57,6 +58,14 @@ const waText = summary
 
 <style>
   .btn { gap: var(--space-2); }
+  /* Confirmation state: a calm check draws itself once. The text is there from the first paint. */
+  .done { width: 56px; height: 56px; display: block; }
+  .done .draw-line { fill: none; stroke: var(--color-olive); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @media (prefers-reduced-motion: no-preference) {
+    .done .ring { animation: motion-draw var(--motion-reveal) var(--ease-settle) both; }
+    .done .tickmark { animation: motion-draw var(--motion-state) var(--ease-settle) 500ms both; }
+  }
+  h1 { font-size: clamp(40px, 7vw, 80px); line-height: 1; letter-spacing: -0.015em; }
   .summary { margin: 0; display: grid; gap: var(--space-3); }
   .summary div { display: grid; grid-template-columns: minmax(110px, 30%) 1fr; gap: var(--space-3); }
   dt { color: var(--color-muted); font-size: 14px; }

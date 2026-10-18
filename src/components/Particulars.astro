@@ -1,0 +1,69 @@
+---
+// "The particulars": the facts after the story, set like a specification in a magazine rather than an icon grid.
+// Replaces the brand guide's amenity grid (redesign audit, item 2).
+import Placeholdered from './Placeholdered.astro';
+import { DHA_RETREAT as L } from '../content/listings';
+
+const groups: { title: string; items: [string, string][] }[] = [
+  {
+    title: 'Sleeping',
+    items: [
+      ['Bedrooms', '3: a king and a twin upstairs, a queen on the ground floor'],
+      ['Bathrooms', '4 [PLACEHOLDER: which rooms are en-suite]'],
+      ['Guests', `${L.facts.sleeps} in beds, up to ${L.facts.maxGuests} with extra bedding`],
+    ],
+  },
+  {
+    title: 'Living',
+    items: [
+      ['Power', 'Solar and UPS backup for lights, fans and Wi-Fi'],
+      ['Work', 'Study table in the games room, Wi-Fi throughout [PLACEHOLDER: speed]'],
+      ['Cooling', 'Air conditioning in every bedroom and the lounge'],
+      ['Kitchen', 'Fully equipped'],
+    ],
+  },
+  {
+    title: 'Arriving',
+    items: [
+      ['Parking', 'Covered car porch inside the gate'],
+      ['Security', 'Exterior cameras'],
+      ['On site', 'A caretaker for the length of your stay'],
+      ['Check-in', '[PLACEHOLDER: check-in and check-out times]'],
+    ],
+  },
+  {
+    title: 'Paying',
+    items: [
+      ['Rate', 'USD 60 a night for up to 6 guests'],
+      ['Extra bedding', 'PKR 1,000 per bedding per night, guests 7 and 8'],
+      ['To confirm', `${L.depositPct}% security deposit, returned after checkout`],
+      ['At check-in', 'The stay itself, in USD or PKR. No platform fees.'],
+    ],
+  },
+];
+---
+<div class="particulars">
+  {groups.map((g) => (
+    <section class="group" aria-labelledby={`p-${g.title}`}>
+      <h3 id={`p-${g.title}`}>{g.title}</h3>
+      <dl>
+        {g.items.map(([k, v]) => (
+          <div class="item reveal-rise">
+            <dt>{k}</dt>
+            <dd><Placeholdered text={v} /></dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  ))}
+</div>
+
+<style>
+  .particulars { display: grid; gap: var(--space-7) var(--space-8); }
+  @media (min-width: 768px) { .particulars { grid-template-columns: 1fr 1fr; } }
+  h3 { font-family: var(--font-sans); font-size: var(--type-h6-size); line-height: var(--type-h6-line); letter-spacing: var(--type-h6-tracking); text-transform: uppercase; font-weight: 500; color: var(--color-walnut); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-charcoal); }
+  dl { margin: 0; }
+  .item { display: grid; grid-template-columns: minmax(7.5rem, 32%) 1fr; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-line); }
+  dt { font-size: 14px; color: var(--color-muted); }
+  dd { margin: 0; font-size: 16px; line-height: 1.5; }
+</style>
