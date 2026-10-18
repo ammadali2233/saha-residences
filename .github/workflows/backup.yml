@@ -11,6 +11,8 @@ permissions:
 
 jobs:
   backup:
+    # Off until production exists: set the repository variable BACKUPS_ENABLED=true once the secrets are in.
+    if: vars.BACKUPS_ENABLED == 'true'
     runs-on: ubuntu-latest
     env:
       DB_URL: ${{ secrets.PROD_DB_URL }}
