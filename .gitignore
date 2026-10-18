@@ -1,0 +1,32 @@
+# dependencies and build output
+node_modules/
+dist/
+.astro/
+.wrangler/
+
+# local secrets (never commit)
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# supabase local state
+supabase/.branches/
+supabase/.temp/
+
+# test output
+test-results/
+playwright-report/
+coverage/
+
+# large media: the walkthrough video is uploaded to YouTube, not stored in git
+*.mp4
+*.mov
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json

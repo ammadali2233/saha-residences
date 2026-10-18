@@ -1,0 +1,57 @@
+{
+  "$source": "SAHA Residences brand guide v1.0, October 2026. https://claude.ai/artifact/Gsy32cPwyDA38hCybEFtFG (section 11, Design tokens). Copied verbatim from the guide's token object. Do not edit by hand; update the guide, then re-copy.",
+  "color": {
+    "stone": "#EDE8E0",
+    "charcoal": "#262523",
+    "walnut": "#6B4430",
+    "olive": "#5C6235",
+    "stone-50": "#F6F3EE",
+    "stone-200": "#E2DCD2",
+    "line": "#D8D1C6",
+    "line-strong": "#8A8279",
+    "muted": "#5E5850",
+    "line-dark": "#4A4743",
+    "muted-dark": "#B5ACA0",
+    "walnut-700": "#553524",
+    "walnut-800": "#432A1C",
+    "error": "#9B2C2C",
+    "white": "#FFFFFF"
+  },
+  "font": {
+    "display": "'Bodoni Moda', Georgia, serif",
+    "sans": "'Jost', system-ui, sans-serif"
+  },
+  "type": {
+    "h1": { "family": "display", "weight": 400, "size": ["40px", "64px"], "line": ["46px", "72px"], "tracking": "-0.01em" },
+    "h2": { "family": "display", "weight": 400, "size": ["32px", "48px"], "line": ["38px", "56px"], "tracking": "-0.005em" },
+    "h3": { "family": "display", "weight": 400, "size": ["26px", "36px"], "line": ["32px", "44px"], "tracking": "0" },
+    "h4": { "family": "display", "weight": 400, "size": ["22px", "28px"], "line": ["28px", "36px"], "tracking": "0" },
+    "h5": { "family": "sans", "weight": 500, "size": ["18px", "20px"], "line": ["26px", "28px"], "tracking": "0" },
+    "h6": { "family": "sans", "weight": 500, "size": ["12px", "13px"], "line": ["18px", "20px"], "tracking": "0.16em" },
+    "body-lg": { "family": "sans", "weight": 400, "size": ["17px", "18px"], "line": ["28px", "30px"], "tracking": "0" },
+    "body": { "family": "sans", "weight": 400, "size": ["16px", "16px"], "line": ["26px", "26px"], "tracking": "0" },
+    "caption": { "family": "sans", "weight": 400, "size": ["13px", "13px"], "line": ["20px", "20px"], "tracking": "0.01em" },
+    "label": { "family": "sans", "weight": 500, "size": ["12px", "12px"], "line": ["16px", "16px"], "tracking": "0.14em" },
+    "button": { "family": "sans", "weight": 500, "size": ["16px", "15px"], "line": ["20px", "20px"], "tracking": "0.02em" }
+  },
+  "space": { "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "24px", "6": "32px", "7": "48px", "8": "64px", "9": "96px", "10": "128px" },
+  "radius": { "none": "0", "sm": "2px", "md": "4px", "pill": "999px" },
+  "elevation": { "0": "none", "1": "0 0 0 1px #D8D1C6", "2": "0 8px 24px rgba(38,37,35,0.08)" },
+  "container": { "text": "720px", "default": "1200px", "wide": "1440px" },
+  "breakpoint": { "sm": "480px", "md": "768px", "lg": "1024px", "xl": "1280px" },
+  "control": { "height": "48px", "touch-min": "44px", "focus-ring": "2px solid #262523", "focus-offset": "2px" },
+  "approvedTextPairings": [
+    { "fg": "#262523", "bg": "#EDE8E0", "label": "Charcoal / Stone", "ratio": "12.6:1" },
+    { "fg": "#262523", "bg": "#F6F3EE", "label": "Charcoal / Stone 50", "ratio": "13.8:1" },
+    { "fg": "#5E5850", "bg": "#EDE8E0", "label": "Muted / Stone", "ratio": "5.8:1" },
+    { "fg": "#6B4430", "bg": "#EDE8E0", "label": "Walnut / Stone", "ratio": "6.9:1" },
+    { "fg": "#5C6235", "bg": "#F6F3EE", "label": "Olive / Stone 50", "ratio": "5.8:1" },
+    { "fg": "#9B2C2C", "bg": "#F6F3EE", "label": "Error / Stone 50", "ratio": "6.8:1" },
+    { "fg": "#EDE8E0", "bg": "#262523", "label": "Stone / Charcoal", "ratio": "12.6:1" },
+    { "fg": "#FFFFFF", "bg": "#262523", "label": "White / Charcoal", "ratio": "15.3:1" },
+    { "fg": "#B5ACA0", "bg": "#262523", "label": "Muted dark / Charcoal", "ratio": "6.8:1" },
+    { "fg": "#FFFFFF", "bg": "#6B4430", "label": "White / Walnut", "ratio": "8.4:1" },
+    { "fg": "#FFFFFF", "bg": "#553524", "label": "White / Walnut 700", "ratio": "10.9:1" },
+    { "fg": "#FFFFFF", "bg": "#5C6235", "label": "White / Olive", "ratio": "6.5:1" }
+  ]
+}
