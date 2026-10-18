@@ -35,6 +35,18 @@ Production backups run nightly at 02:00 PKT (`.github/workflows/backup.yml`).
 
 Receipts and photos in Supabase Storage are backed up as files from Phase 5 on. They aren't part of the database dump.
 
+## Staging (live since 2026-10-18)
+- Site: https://saha-staging.ammadali33.workers.dev. Worker `saha-staging` on the `ammadali33` Cloudflare account.
+- Database: Supabase project `xzgwjrlapwwovltzcfdr`, linked with `npx supabase link --project-ref xzgwjrlapwwovltzcfdr`.
+- Worker secrets: `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key, `sb_publishable_...`).
+- Deploy (bash):
+  ```bash
+  CLOUDFLARE_ENV=staging SITE_URL=https://saha-staging.ammadali33.workers.dev npm run build && npx wrangler deploy
+  ```
+- Push new migrations: `npx supabase db push`. Add `--include-seed` only when staging should get sample data.
+- Check permissions on staging: `npx supabase test db --linked`. It runs in a transaction that rolls back.
+- Admin login: created with `node --env-file=.env.staging-admin scripts/create-admin.mjs`. That file holds the Supabase **secret** key, so delete it once the admin exists.
+
 ## Setting up staging and production (accounts you create)
 These need your own accounts. I can't create them for you.
 1. **Supabase:** two projects, `saha-staging` and `saha-prod`, region closest to Pakistan (e.g. Mumbai). Turn on TOTP MFA, turn off public sign-ups, and set the minimum password length to 15.
