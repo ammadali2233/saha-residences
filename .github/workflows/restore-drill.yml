@@ -1,0 +1,39 @@
+name: Monthly restore drill
+
+# Restores the latest production backup onto a fresh database built from our migrations,
+# then checks row counts match the counts recorded at backup time (D-004).
+on:
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Fetch and decrypt latest backup
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp "s3://${{ secrets.R2_BUCKET }}/db/latest.tar.gz.gpg" latest.tar.gz.gpg --endpoint-url "${{ secrets.R2_ENDPOINT }}"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" -o latest.tar.gz -d latest.tar.gz.gpg
+          mkdir -p restore && tar -xzf latest.tar.gz -C restore
+      - name: Build an empty database from migrations (no sample seed)
+        run: |
+          supabase db start
+          supabase db reset --no-seed
+      - name: Restore data and compare counts
+        run: node scripts/restore-drill.mjs --data restore/data.sql --expected restore/counts.json --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      - name: Report
+        if: always()
+        run: curl -fsS -m 10 --retry 3 "${{ secrets.HC_DRILL_URL }}$([ '${{ job.status }}' = 'success' ] || echo /fail)" > /dev/null || true

@@ -1,0 +1,58 @@
+name: Nightly backup
+
+# 02:00 Pakistan time. Supabase Free has no automatic backups (D-004).
+on:
+  schedule:
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      DB_URL: ${{ secrets.PROD_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Dump roles, schema and data
+        run: |
+          mkdir -p out
+          supabase db dump --db-url "$DB_URL" --role-only -f out/roles.sql
+          supabase db dump --db-url "$DB_URL" -f out/schema.sql
+          supabase db dump --db-url "$DB_URL" --data-only --use-copy -s public,auth -f out/data.sql
+      - name: Record row counts for the restore drill
+        run: |
+          psql "$DB_URL" -At -c "select json_object_agg(t, n) from (
+            select 'bookings' t, count(*) n from public.bookings union all
+            select 'payments', count(*) from public.payments union all
+            select 'expenses', count(*) from public.expenses union all
+            select 'guests', count(*) from public.guests union all
+            select 'capital_contributions', count(*) from public.capital_contributions union all
+            select 'audit_log', count(*) from public.audit_log) s" > out/counts.json
+      - name: Encrypt and upload to R2
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          stamp=$(date -u +%Y-%m-%dT%H%MZ)
+          tar -czf backup.tar.gz -C out .
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
+              --symmetric --cipher-algo AES256 -o "saha-$stamp.tar.gz.gpg" backup.tar.gz
+          aws s3 cp "saha-$stamp.tar.gz.gpg" "s3://${{ secrets.R2_BUCKET }}/db/saha-$stamp.tar.gz.gpg" \
+              --endpoint-url "${{ secrets.R2_ENDPOINT }}"
+          aws s3 cp "saha-$stamp.tar.gz.gpg" "s3://${{ secrets.R2_BUCKET }}/db/latest.tar.gz.gpg" \
+              --endpoint-url "${{ secrets.R2_ENDPOINT }}"
+      # Healthchecks.io alerts if this ping stops arriving. GitHub also emails on any failed run.
+      - name: Report success
+        if: success()
+        run: curl -fsS -m 10 --retry 3 "${{ secrets.HC_BACKUP_URL }}" > /dev/null
+      - name: Report failure
+        if: failure()
+        run: curl -fsS -m 10 --retry 3 "${{ secrets.HC_BACKUP_URL }}/fail" > /dev/null || true
