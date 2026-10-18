@@ -1,0 +1,18 @@
+{
+  // Production worker. Staging is `wrangler deploy --env staging`.
+  // Secrets (SUPABASE_URL, SUPABASE_ANON_KEY) are set with `wrangler secret put`, never here.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "saha",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./dist", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "vars": { "APP_ENV": "production" },
+  "env": {
+    "staging": {
+      "name": "saha-staging",
+      "vars": { "APP_ENV": "staging" }
+    }
+  }
+}

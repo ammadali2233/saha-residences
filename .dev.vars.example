@@ -1,0 +1,10 @@
+# Copy to .dev.vars for local development (gitignored). Values come from `npx supabase status`.
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=<anon key from `npx supabase status`>
+APP_ENV=local
+
+# Only used by scripts/create-admin.mjs. Never deployed to the Worker.
+SUPABASE_SERVICE_ROLE_KEY=<service_role key from `npx supabase status`>
+ADMIN_EMAIL=ammadali33@gmail.com
+# 15+ characters. Do not reuse a password from any other service.
+ADMIN_PASSWORD=<choose a passphrase>
