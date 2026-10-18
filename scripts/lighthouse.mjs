@@ -1,10 +1,11 @@
 // Mobile Lighthouse for every public page template (quality gate: 95+ in all four categories).
-// Usage: node scripts/lighthouse.mjs http://localhost:4322   (CHROME_PATH may point at any Chromium)
+// Usage: node scripts/lighthouse.mjs http://localhost:4322 [paths...]   (CHROME_PATH may point at any Chromium)
+// Lighthouse mobile defaults: simulated slow 4G and 4x CPU slowdown.
 import { launch } from 'chrome-launcher';
 import lighthouse from 'lighthouse';
 
 const base = process.argv[2] ?? 'http://localhost:4322';
-const pages = ['/', '/stays/dha-retreat/', '/stays/dha-retreat/gallery/', '/book/', '/location/', '/faq/', '/house-rules/', '/stays/'];
+const pages = process.argv.length > 3 ? process.argv.slice(3) : ['/', '/stays/dha-retreat/', '/stays/dha-retreat/gallery/', '/book/', '/location/', '/faq/', '/house-rules/', '/stays/'];
 const chrome = await launch({ chromeFlags: ['--headless=new', '--no-sandbox'] });
 let failed = false;
 const rows = [];

@@ -1,0 +1,36 @@
+---
+// One booking entry point that is always one tap away on phones (redesign brief: "booking stays frictionless").
+// Replaces the repeated "Check dates" bands and the floating WhatsApp button.
+import Icon from './Icon.astro';
+import { whatsappLink } from '../content/site';
+
+interface Props {
+  slug?: string;
+  tone?: 'light' | 'dark';
+}
+const { slug = 'dha-retreat', tone = 'light' } = Astro.props;
+---
+<div class:list={['sticky-book', tone]} role="region" aria-label="Book DHA Retreat">
+  <p class="price"><strong>USD 60</strong> a night <span>No platform fees</span></p>
+  <a class="wa" href={whatsappLink('Hello, I have a question about DHA Retreat.')} data-event="whatsapp_click" aria-label="Ask on WhatsApp"><Icon name="message-circle" size={20} /></a>
+  <a class="btn btn-primary dates" href={`/book/?stay=${slug}`} data-event="booking_started">Check dates</a>
+</div>
+
+<style>
+  .sticky-book {
+    position: fixed; z-index: 30; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    background: var(--color-stone-50); color: var(--color-charcoal); border-radius: var(--radius-sm); box-shadow: var(--elevation-2), var(--elevation-1);
+  }
+  .sticky-book.dark { background: var(--color-charcoal); color: var(--color-stone); }
+  .price { font-size: 15px; line-height: 20px; margin: 0; }
+  .price strong { font-weight: 500; }
+  .price span { display: block; font-size: 12px; color: var(--color-muted); }
+  .dark .price span { color: var(--color-muted-dark); }
+  .wa { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: inherit; border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm); }
+  .dates { min-height: 44px; padding: 0 var(--space-4); }
+  @media (min-width: 1024px) {
+    .sticky-book { left: auto; right: var(--space-5); bottom: var(--space-5); width: 400px; }
+  }
+</style>

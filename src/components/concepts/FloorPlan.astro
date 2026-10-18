@@ -1,0 +1,137 @@
+---
+// Interactive floor plan (signature graphic 1). Schematic, not to scale: layout as described by the owner,
+// still to be confirmed. Without JavaScript every room's details show as a list; with it, one room at a time.
+import { Image } from 'astro:assets';
+import { DHA_RETREAT as L } from '../../content/listings';
+
+type Room = { id: string; floor: 'ground' | 'upper'; name: string; short: string; detail: string; x: number; y: number; w: number; h: number; photo?: (typeof L.photos)[number] };
+const [master, lounge, second, third] = L.photos;
+const rooms: Room[] = [
+  { id: 'queen', floor: 'ground', name: 'Queen bedroom', short: 'Queen', detail: 'Queen bed, air conditioning and roller blinds. On the ground floor, for anyone who would rather skip the stairs.', x: 40, y: 40, w: 200, h: 180, photo: second },
+  { id: 'living', floor: 'ground', name: 'Living and dining', short: 'Living', detail: 'A curved sofa, a smart TV and the dining table, with the kitchen next door.', x: 240, y: 40, w: 190, h: 290, photo: lounge },
+  { id: 'kitchen', floor: 'ground', name: 'Kitchen', short: 'Kitchen', detail: 'Fully equipped for home cooking.', x: 430, y: 40, w: 130, h: 160 },
+  { id: 'powder', floor: 'ground', name: 'Powder room', short: 'WC', detail: 'A guest toilet off the living area.', x: 430, y: 200, w: 130, h: 130 },
+  { id: 'stairs-g', floor: 'ground', name: 'Stairs', short: 'Stairs', detail: 'Up to the bedrooms and the games room.', x: 40, y: 220, w: 200, h: 110 },
+  { id: 'master', floor: 'upper', name: 'Master bedroom', short: 'Master', detail: 'King bed with a velvet headboard, sheers and curtains, air conditioning.', x: 40, y: 40, w: 180, h: 290, photo: master },
+  { id: 'games', floor: 'upper', name: 'Games room and workstation', short: 'Games', detail: 'Between the two upstairs bedrooms: somewhere to play, and a study table to work from.', x: 220, y: 40, w: 160, h: 200 },
+  { id: 'stairs-u', floor: 'upper', name: 'Stairs', short: 'Stairs', detail: 'Down to the living room and kitchen.', x: 220, y: 240, w: 160, h: 90 },
+  { id: 'twin', floor: 'upper', name: 'Twin bedroom', short: 'Twin', detail: 'Two single beds facing the master bedroom across the landing.', x: 380, y: 40, w: 180, h: 290, photo: third },
+];
+const floors = [
+  { id: 'upper', label: 'Upstairs' },
+  { id: 'ground', label: 'Ground floor' },
+] as const;
+---
+<div class="plan" data-plan>
+  <div class="tabs" role="group" aria-label="Choose a floor">
+    {floors.map((f, i) => <button type="button" data-floor-btn={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>)}
+  </div>
+
+  <div class="stage">
+    {floors.map((f, i) => (
+      <figure class:list={['floor', 'draw-on-scroll']} data-floor={f.id} data-active={i === 0 ? 'true' : undefined}>
+        <svg viewBox="0 0 600 420" role="img" aria-label={`${f.label} plan, schematic and not to scale`}>
+          <rect class="draw-line outer" x="40" y="40" width="520" height="290" pathLength="1" />
+          {f.id === 'ground' && <rect class="porch" x="240" y="330" width="320" height="70" />}
+          {f.id === 'ground' && <text class="lbl small" x="400" y="372">Car porch</text>}
+          {rooms.filter((r) => r.floor === f.id).map((r) => (
+            <g class="room" data-room={r.id}>
+              <rect class="draw-line" x={r.x} y={r.y} width={r.w} height={r.h} pathLength="1" />
+              <rect class="hit" x={r.x} y={r.y} width={r.w} height={r.h} />
+              <text class="lbl long" x={r.x + r.w / 2} y={r.y + r.h / 2}>{r.name.split(' and ')[0]}</text>
+              <text class="lbl short" x={r.x + r.w / 2} y={r.y + r.h / 2}>{r.short}</text>
+            </g>
+          ))}
+        </svg>
+        <figcaption>{f.label}. Schematic, not to scale. <mark class="placeholder">[PLACEHOLDER: confirm layout and bathrooms]</mark></figcaption>
+      </figure>
+    ))}
+  </div>
+
+  <div class="rooms">
+    <ul class="index" aria-label="Rooms">
+      {rooms.filter((r) => !r.id.startsWith('stairs')).map((r) => (
+        <li data-floor-item={r.floor}><button type="button" data-room-btn={r.id} aria-controls={`room-${r.id}`}>{r.name}</button></li>
+      ))}
+    </ul>
+    <div class="details">
+      {rooms.filter((r) => !r.id.startsWith('stairs')).map((r) => (
+        <article id={`room-${r.id}`} class="room-card" data-room-card={r.id}>
+          {r.photo ? (
+            <Image src={r.photo.src} alt={r.photo.alt} widths={[400, 700]} sizes="(max-width: 767px) 100vw, 40vw" />
+          ) : (
+            <div class="no-photo">Photo coming</div>
+          )}
+          <h3>{r.name}</h3>
+          <p>{r.detail}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  for (const plan of document.querySelectorAll<HTMLElement>('[data-plan]')) {
+    plan.classList.add('js');
+    const show = (id: string) => {
+      plan.querySelectorAll<HTMLElement>('[data-room-card]').forEach((c) => (c.hidden = c.dataset.roomCard !== id));
+      plan.querySelectorAll<HTMLElement>('[data-room]').forEach((g) => g.classList.toggle('on', g.dataset.room === id));
+      plan.querySelectorAll<HTMLButtonElement>('[data-room-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.roomBtn === id)));
+    };
+    const floor = (id: string) => {
+      plan.querySelectorAll<HTMLElement>('[data-floor]').forEach((f) => f.toggleAttribute('data-active', f.dataset.floor === id));
+      plan.querySelectorAll<HTMLButtonElement>('[data-floor-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.floorBtn === id)));
+      plan.querySelectorAll<HTMLElement>('[data-floor-item]').forEach((li) => (li.hidden = li.dataset.floorItem !== id));
+      const first = plan.querySelector<HTMLElement>(`[data-floor-item="${id}"] [data-room-btn]`);
+      if (first) show(first.dataset.roomBtn!);
+    };
+    plan.querySelectorAll<HTMLButtonElement>('[data-floor-btn]').forEach((b) => b.addEventListener('click', () => floor(b.dataset.floorBtn!)));
+    plan.querySelectorAll<HTMLButtonElement>('[data-room-btn]').forEach((b) => b.addEventListener('click', () => show(b.dataset.roomBtn!)));
+    // Pointer users can tap rooms on the drawing too; keyboard users use the list beside it.
+    plan.querySelectorAll<SVGGElement>('[data-room]').forEach((g) => {
+      const id = g.dataset.room!;
+      if (id.startsWith('stairs')) return;
+      g.addEventListener('click', () => show(id));
+      g.addEventListener('pointerenter', (e) => { if ((e as PointerEvent).pointerType === 'mouse') show(id); });
+    });
+    floor('upper');
+  }
+</script>
+
+<style>
+  .plan { display: grid; gap: var(--space-5); }
+  @media (min-width: 1024px) { .plan { grid-template-columns: 7fr 5fr; grid-template-areas: 'tabs tabs' 'stage rooms'; column-gap: var(--space-8); } .tabs { grid-area: tabs; } .stage { grid-area: stage; } .rooms { grid-area: rooms; } }
+  .tabs { display: flex; gap: var(--space-2); }
+  .tabs button { min-height: 44px; padding: 0 var(--space-4); background: transparent; border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm); font: inherit; font-size: 15px; color: var(--color-charcoal); cursor: pointer; }
+  .tabs button[aria-pressed='true'] { background: var(--color-charcoal); color: var(--color-stone); border-color: var(--color-charcoal); }
+
+  .floor { margin: 0; }
+  :global(.plan.js) .floor:not([data-active]) { display: none; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .draw-line { fill: none; stroke: var(--color-charcoal); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .outer { stroke-width: 3; }
+  .porch { fill: none; stroke: var(--color-line-strong); stroke-width: 1.5; stroke-dasharray: 6 6; vector-effect: non-scaling-stroke; }
+  .hit { fill: transparent; cursor: pointer; }
+  .room .draw-line { transition: fill var(--motion-state) var(--ease-settle); }
+  .room.on .draw-line { fill: var(--color-stone-200); }
+  .room:hover .draw-line { fill: var(--color-stone-50); }
+  .lbl { font-family: var(--font-sans); font-size: 15px; fill: var(--color-charcoal); text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .lbl.small { font-size: 13px; fill: var(--color-muted); }
+  .lbl.short { display: none; font-size: 30px; }
+  @media (max-width: 767px) { .lbl.long { display: none; } .lbl.short { display: inline; } .lbl.small { font-size: 26px; } }
+  figcaption { font-size: 13px; color: var(--color-muted); margin-top: var(--space-3); }
+
+  .index { list-style: none; margin: 0 0 var(--space-5); padding: 0; border-top: 1px solid var(--color-charcoal); }
+  .index li { border-bottom: 1px solid var(--color-line); }
+  .index button { width: 100%; text-align: left; min-height: 48px; background: none; border: 0; font-family: var(--font-display); font-size: 22px; line-height: 28px; color: var(--color-muted); cursor: pointer; padding: var(--space-2) 0; }
+  .index button[aria-pressed='true'], .index button:hover { color: var(--color-charcoal); }
+  .index button[aria-pressed='true']::after { content: ' \2192'; font-family: var(--font-sans); font-size: 18px; }
+  .details { display: grid; gap: var(--space-5); }
+  .room-card :global(img), .no-photo { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+  .no-photo { background: var(--color-stone-200); display: flex; align-items: center; justify-content: center; color: var(--color-muted); font-size: 13px; }
+  .room-card h3 { font-family: var(--font-sans); font-size: var(--type-h5-size); line-height: var(--type-h5-line); font-weight: 500; margin-top: var(--space-3); }
+  .room-card p { color: var(--color-muted); margin-top: var(--space-1); }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.plan.js) .room-card:not([hidden]) { animation: motion-fade var(--motion-state) var(--ease-settle); }
+  }
+</style>

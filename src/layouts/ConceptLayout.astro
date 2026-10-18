@@ -1,0 +1,39 @@
+---
+// Shell for the three redesign concept prototypes (/concepts/a, b, c). Not indexed, not in the sitemap.
+import BaseLayout from './BaseLayout.astro';
+import StickyBook from '../components/StickyBook.astro';
+import '../styles/motion.css';
+
+interface Props {
+  letter: 'a' | 'b' | 'c';
+  name: string;
+  headerVariant?: 'light' | 'dark';
+}
+const { letter, name, headerVariant = 'light' } = Astro.props;
+const concepts = [
+  { l: 'a', n: 'The house, drawn' },
+  { l: 'b', n: 'A day at DHA Retreat' },
+  { l: 'c', n: 'Field journal' },
+];
+---
+<BaseLayout title={`Concept ${letter.toUpperCase()}: ${name}`} description={`Design concept ${letter.toUpperCase()} for the DHA Retreat website: ${name}.`} noindex fab={false} headerVariant={headerVariant}>
+  <slot name="head" slot="head" />
+  <nav class="concept-switch" aria-label="Design concepts">
+    {concepts.map((c) => (
+      <a href={`/concepts/${c.l}/`} aria-current={c.l === letter ? 'page' : undefined}>{c.l.toUpperCase()} · {c.n}</a>
+    ))}
+  </nav>
+  <slot />
+  <StickyBook tone={headerVariant} />
+</BaseLayout>
+
+<script>
+  import '../scripts/motion';
+</script>
+
+<style>
+  .concept-switch { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); padding: var(--space-2) var(--gutter); background: var(--color-stone-200); font-size: 13px; }
+  .concept-switch a { color: var(--color-charcoal); min-height: 24px; display: inline-flex; align-items: center; }
+  .concept-switch a[aria-current='page'] { font-weight: 500; text-decoration-thickness: 2px; }
+  :global(body) { padding-bottom: 96px; }
+</style>

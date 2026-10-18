@@ -12,7 +12,7 @@ const site = process.env.SITE_URL || 'http://localhost:4321';
 const indexable = process.env.INDEXABLE === 'true';
 
 // Never list private or utility routes in the sitemap.
-const PRIVATE = /\/(admin|api|ical)(\/|$)|\/book\/thanks\/?$/;
+const PRIVATE = /\/(admin|api|ical|concepts)(\/|$)|\/book\/thanks\/?$/;
 
 /** Adds X-Robots-Tag: noindex to every static response on non-production builds. */
 const noindexOutsideProduction = {

@@ -22,6 +22,8 @@ interface Props {
   headerVariant?: 'light' | 'dark';
   /** Lifts the WhatsApp button above a sticky mobile booking bar. */
   stickyBar?: boolean;
+  /** Floating WhatsApp button. Off where a sticky booking bar already carries WhatsApp. */
+  fab?: boolean;
 }
 const {
   title,
@@ -32,6 +34,7 @@ const {
   jsonLd = [],
   headerVariant = 'light',
   stickyBar = false,
+  fab = true,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -77,7 +80,7 @@ const ogUrl = new URL(og.src, Astro.site).href;
       <slot />
     </main>
     <SiteFooter />
-    <WhatsAppFab />
+    {fab && <WhatsAppFab />}
     <script is:inline>
       // Conversion beacon (D-011): event name and path only. No cookies, no identifiers.
       document.addEventListener('click', function (e) {

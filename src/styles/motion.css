@@ -1,0 +1,61 @@
+/* Motion tokens and shared motion primitives (redesign, D-036).
+   One motion language: calm deceleration, short micro-interactions, unhurried reveals.
+   Everything is progressive enhancement: content is fully visible without CSS animation support,
+   without JavaScript, and with prefers-reduced-motion. Only transform, opacity, clip-path and
+   stroke-dashoffset animate. */
+:root {
+  /* Durations */
+  --motion-micro: 200ms;        /* hovers, focus, presses (150 to 250ms) */
+  --motion-state: 400ms;        /* state changes: price updates, month change, tabs */
+  --motion-reveal: 800ms;       /* entrances: text, images (600 to 900ms) */
+  --motion-draw: 1600ms;        /* line drawings when time-based rather than scroll-linked */
+  /* Easing: "settle" decelerates calmly, "glide" eases both ways for movement between states */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-glide: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Choreography */
+  --motion-stagger: 80ms;
+  --motion-distance: 24px;      /* furthest anything travels on entrance */
+}
+
+/* Cross-page continuity (View Transitions API, cross-document). Browsers without it navigate normally. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--motion-state); animation-timing-function: var(--ease-glide); }
+
+@keyframes motion-rise { from { opacity: 0; transform: translateY(var(--motion-distance)); } to { opacity: 1; transform: none; } }
+@keyframes motion-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes motion-wipe-up { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes motion-wipe-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes motion-settle-scale { from { transform: scale(1.06); } to { transform: none; } }
+@keyframes motion-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Line drawings: give each path pathLength="1" so one dash covers the whole stroke. */
+.draw-line { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Scroll-linked reveals where the browser supports scroll-driven animations (no JS needed). */
+  @supports (animation-timeline: view()) {
+    .reveal-rise { animation: motion-rise linear both; animation-timeline: view(); animation-range: entry 5% entry 70%; }
+    .reveal-wipe { animation: motion-wipe-up linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+    .reveal-wipe-right { animation: motion-wipe-right linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
+    .reveal-wipe > img, .reveal-wipe img.settle { animation: motion-settle-scale linear both; animation-timeline: view(); animation-range: entry 0% cover 50%; }
+    .draw-on-scroll .draw-line { animation: motion-draw linear both; animation-timeline: view(); animation-range: entry 10% cover 45%; }
+  }
+  /* Fallback: browsers without scroll timelines get the same reveals once, triggered by motion.ts. */
+  @supports not (animation-timeline: view()) {
+    html.motion-io .reveal-rise:not(.is-in) { opacity: 0; transform: translateY(var(--motion-distance)); }
+    html.motion-io .reveal-wipe:not(.is-in), html.motion-io .reveal-wipe-right:not(.is-in) { clip-path: inset(100% 0 0 0); }
+    html.motion-io .draw-on-scroll:not(.is-in) .draw-line { stroke-dashoffset: 1; }
+    .reveal-rise.is-in { transition: opacity var(--motion-reveal) var(--ease-settle), transform var(--motion-reveal) var(--ease-settle); }
+    .reveal-wipe.is-in, .reveal-wipe-right.is-in { transition: clip-path var(--motion-reveal) var(--ease-settle); }
+    .draw-on-scroll.is-in .draw-line { transition: stroke-dashoffset var(--motion-draw) var(--ease-settle); }
+  }
+  /* Micro-interactions */
+  a, button, .btn { transition: color var(--motion-micro) var(--ease-settle), background-color var(--motion-micro) var(--ease-settle), border-color var(--motion-micro) var(--ease-settle), transform var(--motion-micro) var(--ease-settle); }
+  .btn:active { transform: scale(0.98); }
+  .link-draw { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; text-decoration: none; transition: background-size var(--motion-state) var(--ease-settle); }
+  .link-draw:hover, .link-draw:focus-visible { background-size: 100% 1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

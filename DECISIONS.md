@@ -277,6 +277,19 @@ Format and rules: see "Question your reasoning" in `CLAUDE.md`. "UNVERIFIED" mea
 - Simpler option considered: Cloudflare Access on staging. That's still optional, and noindex is needed either way.
 - Verdict: adopt.
 
+## D-036: Motion is native CSS first, with no animation library  (2026-10-18, redesign)
+- What and why:
+  - Reveals, line drawings and the sun arcs use CSS scroll-driven animations (`animation-timeline: view()`), SVG stroke-dashoffset and the cross-document View Transitions API.
+  - Browsers without scroll timelines get the same reveals from a ~0.5 KB IntersectionObserver script that unobserves after one run.
+  - Motion tokens in `src/styles/motion.css`:
+    - durations: micro 200ms, state 400ms, reveal 800ms, draw 1600ms
+    - easings: `--ease-settle` and `--ease-glide`
+    - stagger 80ms, distance 24px
+- Evidence: MDN scroll-driven animations (https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scroll-driven_animations), web.dev on cross-document view transitions (https://developer.chrome.com/docs/web-platform/view-transitions/cross-document). Measured on the prototypes: mobile Lighthouse 99, TBT 0 ms, CLS 0.
+- Cost: Firefox scroll-timeline support is UNVERIFIED for October 2026, so it may get the fallback. Only transform, opacity, clip-path and stroke-dashoffset animate.
+- Simpler option considered: GSAP or Motion (roughly 25 to 60 KB of JS). That's not needed for anything the concepts do.
+- Verdict: adopt. Revisit only if the chosen concept needs something native can't do.
+
 ## D-019: Brand tokens copied verbatim into `design/brand-tokens.json`  (2026-10-18, phase 0)
 - What and why: the owner asked to import tokens directly, not re-derive them. The guide exposes its own token object.
 - Evidence: SAHA brand guide v1.0, section 11 (https://claude.ai/artifact/Gsy32cPwyDA38hCybEFtFG).
