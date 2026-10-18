@@ -1,0 +1,26 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi' }).format(new Date());
+
+// Phase 1 smoke view: proves the session, MFA and RLS chain end to end. Real overview arrives in Phase 4–5.
+const [{ count: upcoming }, { count: needsDetails }] = await Promise.all([
+  supabase.from('bookings').select('id', { count: 'exact', head: true }).is('deleted_at', null).gte('check_in', today),
+  supabase.from('bookings').select('id', { count: 'exact', head: true }).is('deleted_at', null).eq('needs_details', true),
+]);
+---
+<AdminLayout title="Overview">
+  <h1>Hello, {Astro.locals.profile?.display_name}</h1>
+  <dl class="stats">
+    <div><dt class="label">Upcoming bookings</dt><dd>{upcoming ?? 0}</dd></div>
+    <div><dt class="label">Need details</dt><dd>{needsDetails ?? 0}</dd></div>
+  </dl>
+</AdminLayout>
+
+<style>
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4); margin: var(--space-6) 0 0; }
+  .stats div { background: var(--color-stone-50); box-shadow: var(--elevation-1); border-radius: var(--radius-md); padding: var(--space-5); }
+  .stats dd { margin: var(--space-2) 0 0; font-family: var(--font-display); font-size: var(--type-h2-size); line-height: var(--type-h2-line); }
+</style>

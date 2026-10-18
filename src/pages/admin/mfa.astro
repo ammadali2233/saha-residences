@@ -1,0 +1,80 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+export const prerender = false;
+
+const supabase = Astro.locals.supabase!;
+if (!Astro.locals.userId) return Astro.redirect('/admin/login/', 303);
+if (Astro.locals.aal === 'aal2') return Astro.redirect('/admin/', 303);
+
+let error = '';
+let postedFactorId = '';
+let postedSecret = '';
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  postedFactorId = String(form.get('factorId') ?? '');
+  postedSecret = String(form.get('secret') ?? '').replace(/[^A-Z2-7=]/g, '');
+  const code = String(form.get('code') ?? '').replace(/\s/g, '');
+  const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId: postedFactorId, code });
+  if (!verifyError) return Astro.redirect('/admin/', 303);
+  error = 'That code didn’t work. Codes change every 30 seconds, so use the one showing now.';
+}
+
+const { data: factors } = await supabase.auth.mfa.listFactors();
+const verified = factors?.totp.find((f) => f.status === 'verified');
+// A wrong code during setup keeps the factor the owner already scanned, so they never have to rescan.
+const pending = !verified ? (factors?.all ?? []).find((f) => f.id === postedFactorId && f.status === 'unverified') : undefined;
+
+let enroll: { factorId: string; qr: string | null; secret: string } | null = null;
+if (!verified && pending) {
+  enroll = { factorId: pending.id, qr: null, secret: postedSecret };
+} else if (!verified) {
+  // First visit: clear half-finished enrollments, then start a fresh one.
+  for (const f of factors?.all ?? []) {
+    if (f.status === 'unverified') await supabase.auth.mfa.unenroll({ factorId: f.id });
+  }
+  const { data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Authenticator app' });
+  if (enrollError || !data) {
+    error = 'We couldn’t start authenticator setup. Reload the page to try again.';
+  } else {
+    enroll = { factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
+  }
+}
+const factorId = verified?.id ?? enroll?.factorId ?? '';
+---
+<AdminLayout title="Verify" narrow>
+  {enroll ? (
+    <>
+      <h1>Set up your authenticator</h1>
+      {enroll.qr ? (
+        <>
+          <p>Scan this code with an authenticator app such as Google Authenticator or 1Password, then enter the 6-digit code it shows.</p>
+          <img class="qr" src={enroll.qr} width="200" height="200" alt="QR code for your authenticator app. The setup key below works too." />
+        </>
+      ) : (
+        <p>Use the SAHA entry you already added to your authenticator app.</p>
+      )}
+      {enroll.secret && <p class="caption">Setup key: <code>{enroll.secret}</code></p>}
+    </>
+  ) : (
+    <>
+      <h1>Enter your code</h1>
+      <p>Open your authenticator app and enter the 6-digit code for SAHA.</p>
+    </>
+  )}
+  <form method="post" class="stack">
+    <input type="hidden" name="factorId" value={factorId} />
+    {enroll && <input type="hidden" name="secret" value={enroll.secret} />}
+    <div class="field">
+      <label class="label" for="code">6-digit code</label>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" required aria-describedby={error ? 'mfa-error' : undefined} />
+    </div>
+    {error && <p id="mfa-error" class="field-error" role="alert">{error}</p>}
+    <button class="btn btn-primary" type="submit">Verify</button>
+  </form>
+</AdminLayout>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-5); }
+  .qr { display: block; margin-top: var(--space-5); background: var(--color-white); padding: var(--space-2); border-radius: var(--radius-md); }
+  .caption { font-size: var(--type-caption-size); line-height: var(--type-caption-line); color: var(--color-muted); overflow-wrap: anywhere; }
+</style>

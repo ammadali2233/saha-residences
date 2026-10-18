@@ -1,0 +1,35 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+export const prerender = false;
+
+let error = '';
+let email = '';
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  email = String(form.get('email') ?? '').trim();
+  const password = String(form.get('password') ?? '');
+  const { error: signInError } = await Astro.locals.supabase!.auth.signInWithPassword({ email, password });
+  if (!signInError) return Astro.redirect('/admin/mfa/', 303);
+  // Same message for every failure, so the form doesn't reveal which accounts exist.
+  error = 'That email and password don’t match. Check both and try again.';
+}
+---
+<AdminLayout title="Sign in" narrow>
+  <h1>Sign in</h1>
+  <form method="post" class="stack" novalidate={false}>
+    <div class="field">
+      <label class="label" for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required value={email} aria-describedby={error ? 'login-error' : undefined} />
+    </div>
+    <div class="field">
+      <label class="label" for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required minlength="15" aria-describedby={error ? 'login-error' : undefined} />
+    </div>
+    {error && <p id="login-error" class="field-error" role="alert">{error}</p>}
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+</AdminLayout>
+
+<style>
+  .stack { display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-6); }
+</style>

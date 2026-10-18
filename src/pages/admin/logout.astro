@@ -1,0 +1,8 @@
+---
+export const prerender = false;
+
+if (Astro.request.method === 'POST') {
+  await Astro.locals.supabase!.auth.signOut();
+}
+return Astro.redirect('/admin/login/', 303);
+---
