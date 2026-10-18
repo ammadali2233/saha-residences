@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Page not found" description="This page doesn't exist. Find DHA Retreat, check dates or message us on WhatsApp." noindex>
+  <div class="container-text page-head stack-5">
+    <span class="eyebrow">404</span>
+    <h1>We couldn't find that page</h1>
+    <p class="lede">It may have moved. These are the pages most people look for.</p>
+    <ul class="links">
+      <li><a class="btn btn-primary" href="/book/">Check dates</a></li>
+      <li><a class="btn btn-secondary" href="/stays/dha-retreat/">See DHA Retreat</a></li>
+      <li><a class="text-link" href="/">Home</a></li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+</style>

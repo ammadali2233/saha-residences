@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import logoStacked from '../assets/brand/logo-stacked-stone.png';
+import { LISTINGS } from '../content/listings';
+import { SITE, areaLine, whatsappLink } from '../content/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="inner">
+    <div class="cols">
+      <Image src={logoStacked} alt="SAHA Residences" width={120} densities={[1, 2]} class="logo" />
+      <nav aria-label="Stays">
+        <h2 class="col-title">Stays</h2>
+        {LISTINGS.map((l) => <a href={`/stays/${l.slug}/`}>{l.name}</a>)}
+        <a href="/stays/">All stays</a>
+      </nav>
+      <nav aria-label="Guests">
+        <h2 class="col-title">Guests</h2>
+        <a href="/book/">Book direct</a>
+        <a href="/house-rules/">House rules and cancellation</a>
+        <a href="/faq/">FAQ</a>
+        <a href="/location/">Location</a>
+      </nav>
+      <div>
+        <h2 class="col-title">Contact</h2>
+        <a href={`tel:${SITE.phoneE164}`} data-event="phone_click">{SITE.phoneDisplay}</a>
+        <a href={whatsappLink()} data-event="whatsapp_click">WhatsApp</a>
+        <span>{areaLine}</span>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© {year} {SITE.name}</span>
+      <span><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></span>
+      <span>Also listed on Airbnb and Booking.com</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { background: var(--color-charcoal); color: var(--color-stone); margin-top: var(--section-gap); }
+  .inner { max-width: var(--container-default); margin: 0 auto; padding: var(--space-7) var(--gutter) var(--space-5); display: flex; flex-direction: column; gap: var(--space-7); }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-6); }
+  .cols > nav, .cols > div { display: flex; flex-direction: column; gap: var(--space-3); font-size: 14px; }
+  .col-title { font-family: var(--font-sans); font-size: var(--type-label-size); line-height: var(--type-label-line); letter-spacing: var(--type-label-tracking); text-transform: uppercase; font-weight: 400; color: var(--color-muted-dark); margin: 0; }
+  a { color: var(--color-stone); text-decoration: none; min-height: 24px; }
+  a:hover { color: var(--color-white); text-decoration: underline; }
+  :focus-visible { outline-color: var(--color-stone); }
+  .legal { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); border-top: 1px solid var(--color-line-dark); padding-top: var(--space-5); font-size: 13px; color: var(--color-muted-dark); }
+  .legal a { color: var(--color-muted-dark); text-decoration: underline; }
+  .logo { height: auto; }
+</style>

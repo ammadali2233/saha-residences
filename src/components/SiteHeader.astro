@@ -1,0 +1,100 @@
+---
+// Brand guide navigation: logo, Stays dropdown (kept even with one home), links, WhatsApp and Book direct.
+// Dropdown and mobile menu use <details>, so they work without JavaScript.
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import logoCharcoal from '../assets/brand/logo-horizontal-charcoal.png';
+import logoStone from '../assets/brand/logo-horizontal-stone.png';
+import { LISTINGS } from '../content/listings';
+import { NAV, whatsappLink } from '../content/site';
+
+interface Props {
+  variant?: 'light' | 'dark';
+}
+const { variant = 'light' } = Astro.props;
+const path = Astro.url.pathname;
+const logo = variant === 'dark' ? logoStone : logoCharcoal;
+const links = NAV.filter((l) => !l.href.startsWith('/stays/'));
+---
+<header class:list={['site-header', variant]}>
+  <div class="bar">
+    <a class="brand" href="/" aria-label="SAHA Residences home">
+      <Image src={logo} alt="SAHA Residences" height={32} width={Math.round((32 * logo.width) / logo.height)} densities={[1, 2]} loading="eager" />
+    </a>
+
+    <nav class="primary" aria-label="Main">
+      <details class="stays">
+        <summary>Stays <Icon name="chevron-down" size={16} /></summary>
+        <div class="stays-panel">
+          {LISTINGS.map((l) => (
+            <a class="stay-row" href={`/stays/${l.slug}/`} aria-current={path.startsWith(`/stays/${l.slug}/`) ? 'page' : undefined}>
+              <span class="stay-name">{l.name}</span>
+              <span class="stay-meta">{l.area} · {l.facts.bedrooms} bedrooms · Sleeps {l.facts.sleeps}</span>
+            </a>
+          ))}
+          <a class="all-stays" href="/stays/">See all stays</a>
+        </div>
+      </details>
+      {links.map((l) => (
+        <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>{l.label}</a>
+      ))}
+    </nav>
+
+    <div class="actions">
+      <a class="icon-btn" href={whatsappLink('Hello, I have a question about DHA Retreat.')} data-event="whatsapp_click" aria-label="Chat with us on WhatsApp">
+        <Icon name="message-circle" size={20} />
+      </a>
+      <a class:list={['btn', variant === 'dark' ? 'btn-on-dark' : 'btn-primary', 'book-btn']} href="/book/" data-event="booking_started">Book direct</a>
+      <details class="mobile-menu">
+        <summary aria-label="Menu"><Icon name="menu" size={22} /></summary>
+        <nav class="mobile-panel" aria-label="Mobile">
+          {LISTINGS.map((l) => <a href={`/stays/${l.slug}/`}>{l.name}</a>)}
+          {links.map((l) => <a href={l.href}>{l.label}</a>)}
+          <a href="/book/" data-event="booking_started">Book direct</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header { background: var(--color-stone); color: var(--color-charcoal); border-bottom: 1px solid var(--color-line); position: relative; z-index: 20; }
+  .site-header.dark { background: var(--color-charcoal); color: var(--color-stone); border-bottom-color: var(--color-line-dark); }
+  .bar { max-width: var(--container-wide); margin: 0 auto; height: 72px; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); }
+  .brand { display: flex; align-items: center; min-height: var(--control-touch-min); }
+  .brand img { height: 28px; width: auto; display: block; }
+  .primary { display: none; align-items: center; gap: var(--space-6); font-size: 15px; }
+  .primary a, .stays summary { color: inherit; text-decoration: none; padding: var(--space-3) 0; border-bottom: 1px solid transparent; }
+  .primary a:hover, .stays summary:hover, .primary a[aria-current='page'] { border-bottom-color: currentColor; }
+  summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  summary::-webkit-details-marker { display: none; }
+  .stays { position: relative; }
+  .stays[open] summary { border-bottom-color: currentColor; }
+  .stays-panel {
+    position: absolute; top: calc(100% + var(--space-3)); left: 50%; transform: translateX(-50%); width: min(420px, 90vw);
+    background: var(--color-stone-50); color: var(--color-charcoal); border: 1px solid var(--color-line); border-radius: var(--radius-md);
+    box-shadow: var(--elevation-2); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2);
+  }
+  .stay-row { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2); border-radius: var(--radius-sm); border: 0 !important; }
+  .stay-row:hover { background: var(--color-stone); }
+  .stay-name { font-family: var(--font-display); font-size: 22px; line-height: 28px; }
+  .stay-meta { font-size: 13px; color: var(--color-muted); }
+  .all-stays { border-top: 1px solid var(--color-line) !important; padding: var(--space-3) var(--space-2) 0 !important; font-size: 13px; color: var(--color-walnut) !important; }
+  .actions { display: flex; align-items: center; gap: var(--space-3); }
+  .icon-btn { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm); color: inherit; }
+  .dark .icon-btn { border-color: var(--color-stone); }
+  .book-btn { display: none; min-height: 44px; padding: 0 20px; }
+  .mobile-menu summary { width: 44px; height: 44px; justify-content: center; }
+  .mobile-panel {
+    position: absolute; left: 0; right: 0; top: 72px; background: var(--color-stone-50); color: var(--color-charcoal);
+    border-bottom: 1px solid var(--color-line); box-shadow: var(--elevation-2); display: flex; flex-direction: column; padding: var(--space-2) var(--gutter) var(--space-4);
+  }
+  .mobile-panel a { color: inherit; text-decoration: none; min-height: 48px; display: flex; align-items: center; border-bottom: 1px solid var(--color-line); font-size: 17px; }
+  .mobile-panel a:last-child { border-bottom: 0; color: var(--color-walnut); font-weight: 500; }
+  @media (min-width: 1024px) {
+    .primary { display: flex; }
+    .book-btn { display: inline-flex; }
+    .mobile-menu { display: none; }
+    .brand img { height: 32px; }
+  }
+</style>

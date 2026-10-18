@@ -227,6 +227,56 @@ Format and rules: see "Question your reasoning" in `CLAUDE.md`. "UNVERIFIED" mea
 - Simpler option considered: putting secrets in CI. That puts secrets where they aren't needed.
 - Verdict: adopt.
 
+## D-030: Phase 2 listing copy lives in the repo; live pricing and availability come from the database  (2026-10-18, phase 2)
+- What and why:
+  - Rooms, amenities, rules, nearby times and photos sit in `src/content/listings.ts`, so the site builds with no database secrets (D-029).
+  - Quotes and availability on the Book page come from `public_pricing` and `public_availability` at request time, so prices and blocked dates are always current.
+- Evidence: Astro content via plain modules (https://docs.astro.build/en/guides/imports/).
+- Cost: until Phase 4, copy changes need a code edit, and the "From USD 60" display price is set in two places (content file and database).
+- Simpler option considered: reading everything from the database at build. That needs build-time secrets and the dashboard editor, which are Phase 4 scope.
+- Verdict: adopt for Phase 2. Phase 4 moves the editable fields (price, photos, listings) to the database, with a Publish rebuild.
+
+## D-031: Brand fonts through Astro's Fonts API (Fontsource provider)  (2026-10-18, phase 2)
+- What and why:
+  - Bodoni Moda 400 and Jost 400/500 (latin subset) are downloaded at build and served from our own domain, with `font-display: swap`.
+  - Astro generates metric-matched fallback faces, so swapping fonts doesn't shift layout. Measured CLS is 0 on every page.
+  - Only the first-view files are preloaded: Bodoni 400 and Jost 400.
+- Evidence: Astro fonts guide (https://docs.astro.build/en/guides/fonts/), web.dev on font best practices (https://web.dev/articles/font-best-practices).
+- Cost: Astro renames families with a hash, so `site.css` points `--font-display` and `--font-sans` at the generated variables. The token values stay untouched.
+- Simpler option considered: hand-written `@font-face` rules, which have no fallback metrics.
+- Verdict: adopt.
+
+## D-032: Homepage hero uses a split "framed" layout with the master bedroom  (2026-10-18, phase 2)
+- What and why: the guide's hero crops a landscape photo to 16:7. The only landscape interior (`lounge`) breaks the guide's own photo rules (TV on), and every photo is 1600px or smaller. The portrait master bedroom, framed beside the headline, is rule-compliant and sharp.
+- Evidence: brand guide sections 05 (photography) and 12 (system in use).
+- Cost: differs from the guide's mock. Revisit when new landscape photos arrive.
+- Simpler option considered: using the lounge as the guide does. Rejected because it breaks the photo rules.
+- Verdict: adopt until the reshoot.
+
+## D-033: Images and small interactions without extra libraries  (2026-10-18, phase 2)
+- What and why:
+  - The hero uses `<Picture>` (AVIF, WebP, JPEG fallback). Other photos use `<Image>` in WebP with srcset, width/height and lazy loading.
+  - The gallery lightbox, video facade and map facade are small native scripts (`<dialog>`, click-to-load) rather than Preact islands.
+  - Preact is used only for the Book page.
+- Evidence: web.dev on image optimization and third-party facades. Lighthouse mobile on 2026-10-18 scored 95–100 for performance on every template.
+- Cost: no JPEG fallback for non-hero photos. WebP is supported by every browser we target.
+- Simpler option considered: n/a. This is the simplest option.
+- Verdict: adopt.
+
+## D-034: Map is an area-level Google Maps embed, loaded on click  (2026-10-18, phase 2)
+- What and why: guests need a sense of place, but the exact pin is private until a booking is confirmed. The keyless embed URL (`maps?q=...&output=embed`) shows the area only, and only after a click.
+- Evidence: the official alternative is the Maps Embed API, which needs a Google Cloud API key (https://developers.google.com/maps/documentation/embed/get-started). The keyless URL is UNVERIFIED as a supported interface and could change.
+- Cost: possible breakage. "Open in Google Maps" is always shown as a fallback link.
+- Simpler option considered: link only, with no map.
+- Verdict: adopt. Switch to the Embed API with a restricted key if Google changes the keyless URL.
+
+## D-035: Every build except production sends noindex  (2026-10-18, phase 2)
+- What and why: a build hook appends `X-Robots-Tag: noindex, nofollow` to all static responses unless `INDEXABLE=true`. Staging and preview URLs can never be indexed by mistake. robots.txt stays open so crawlers can see the header.
+- Evidence: Google Search Central, "Block search indexing with noindex" (https://developers.google.com/search/docs/crawling-indexing/block-indexing).
+- Cost: production deploys must set `INDEXABLE=true`.
+- Simpler option considered: Cloudflare Access on staging. That's still optional, and noindex is needed either way.
+- Verdict: adopt.
+
 ## D-019: Brand tokens copied verbatim into `design/brand-tokens.json`  (2026-10-18, phase 0)
 - What and why: the owner asked to import tokens directly, not re-derive them. The guide exposes its own token object.
 - Evidence: SAHA brand guide v1.0, section 11 (https://claude.ai/artifact/Gsy32cPwyDA38hCybEFtFG).

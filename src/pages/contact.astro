@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { SITE, areaLine, whatsappLink } from '../content/site';
+import { breadcrumbLd } from '../lib/seo';
+---
+<BaseLayout
+  title="Contact SAHA Residences"
+  description="Contact SAHA Residences on WhatsApp or by phone at +92 320 5361616. A real person in Lahore will reply about bookings at DHA Retreat."
+  jsonLd={[breadcrumbLd([{ name: 'Contact', url: new URL(Astro.url.pathname, Astro.site) }])]}
+>
+  <div class="container-text page-head">
+    <span class="eyebrow">Contact</span>
+    <h1>Talk to us</h1>
+    <p class="lede">The fastest way to reach us is WhatsApp. A real person in Lahore will reply.</p>
+  </div>
+
+  <div class="container-text section">
+    <ul class="ways">
+      <li class="card">
+        <Icon name="message-circle" size={24} />
+        <h2>WhatsApp</h2>
+        <p class="muted">Questions, availability and bookings.</p>
+        <a class="btn btn-primary" href={whatsappLink('Hello, I have a question about DHA Retreat.')} data-event="whatsapp_click">Chat on WhatsApp</a>
+      </li>
+      <li class="card">
+        <Icon name="phone" size={24} />
+        <h2>Phone</h2>
+        <p class="muted"><mark class="placeholder">[PLACEHOLDER: hours you answer calls]</mark></p>
+        <a class="btn btn-secondary" href={`tel:${SITE.phoneE164}`} data-event="phone_click">{SITE.phoneDisplay}</a>
+      </li>
+      <li class="card">
+        <Icon name="map-pin" size={24} />
+        <h2>Where we are</h2>
+        <p class="muted">{areaLine}, {SITE.country}. We send the exact address once your booking is confirmed.</p>
+        <a class="text-link" href="/location/">Location and drive times</a>
+      </li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .ways { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
+  .ways li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .ways h2 { font-family: var(--font-sans); font-size: var(--type-h5-size); line-height: var(--type-h5-line); font-weight: 500; }
+</style>

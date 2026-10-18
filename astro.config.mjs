@@ -1,14 +1,31 @@
 // @ts-check
-import { defineConfig, envField } from 'astro/config';
+import { appendFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import preact from '@astrojs/preact';
 import sitemap from '@astrojs/sitemap';
 
 // Canonical origin. Set SITE_URL per environment; the domain isn't bought yet.
 const site = process.env.SITE_URL || 'http://localhost:4321';
+// Only a production build sets INDEXABLE=true. Every other build (local, staging, previews) is noindex.
+const indexable = process.env.INDEXABLE === 'true';
 
 // Never list private or utility routes in the sitemap.
 const PRIVATE = /\/(admin|api|ical)(\/|$)|\/book\/thanks\/?$/;
+
+/** Adds X-Robots-Tag: noindex to every static response on non-production builds. */
+const noindexOutsideProduction = {
+  name: 'saha-noindex-outside-production',
+  hooks: {
+    /** @param {{ dir: URL }} options */
+    'astro:build:done': ({ dir }) => {
+      if (indexable) return;
+      const headers = fileURLToPath(new URL('_headers', dir));
+      appendFileSync(headers, '\n/*\n  X-Robots-Tag: noindex, nofollow\n');
+    },
+  },
+};
 
 export default defineConfig({
   site,
@@ -24,7 +41,38 @@ export default defineConfig({
     // Static pages use no Cloudflare bindings, so prerender them in Node (D-029).
     prerenderEnvironment: 'node',
   }),
-  integrations: [preact(), sitemap({ filter: (page) => !PRIVATE.test(new URL(page).pathname) })],
+  integrations: [
+    preact(),
+    sitemap({ filter: (page) => !PRIVATE.test(new URL(page).pathname) }),
+    noindexOutsideProduction,
+  ],
+  // Brand fonts, self-hosted at build time with metric-matched fallbacks to keep layout shift low (D-031).
+  fonts: [
+    {
+      name: 'Bodoni Moda',
+      cssVariable: '--font-bodoni',
+      provider: fontProviders.fontsource(),
+      weights: [400],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'serif'],
+      display: 'swap',
+    },
+    {
+      name: 'Jost',
+      cssVariable: '--font-jost',
+      provider: fontProviders.fontsource(),
+      weights: [400, 500],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['system-ui', 'sans-serif'],
+      display: 'swap',
+    },
+  ],
+  image: {
+    // Every photo ships as AVIF and WebP with a JPEG fallback (CLAUDE.md).
+    layout: 'constrained',
+  },
   env: {
     schema: {
       // Optional at build time: prerendered public pages never touch the database.

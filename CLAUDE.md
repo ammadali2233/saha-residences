@@ -23,7 +23,7 @@ Full plan: `docs/phase-0-plan.md`. Decisions log: `DECISIONS.md`. Read both befo
 - Public phone and WhatsApp: **+92 320 5361616** (`wa.me/923205361616`), the only public number. Use the same NAP everywhere.
 - Admin account email: `ammadali33@gmail.com`.
 - Booking.com iCal: not connected yet.
-- Photos: use the files in the repo root, with marked placeholders for missing rooms.
+- Photos: `src/assets/photos/` (descriptive filenames). Inputs that break the photo rules live in `brand-inputs/` and are not used on the site. Missing rooms show marked placeholders.
 - Channels: Airbnb, Booking.com, Direct website, WhatsApp, Walk-in, Other (editable list).
 - Owners: 4 partners. Profit splits pro-rata to capital, as computed in `src/lib/finance`.
 - **Reporting currency: PKR.** Revenue can arrive in USD or PKR. Most costs are PKR.

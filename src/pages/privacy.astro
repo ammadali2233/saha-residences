@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../content/site';
+---
+<BaseLayout
+  title="Privacy policy"
+  description="What SAHA Residences collects when you send a booking request, why, how long we keep it, and how to ask us to delete it. No advertising cookies."
+>
+  <div class="container-text page-head">
+    <span class="eyebrow">Privacy</span>
+    <h1>Privacy policy</h1>
+    <p class="lede">We collect only what we need to arrange your stay. <mark class="placeholder">[PLACEHOLDER: effective date, and a legal review before launch]</mark></p>
+  </div>
+  <div class="container-text section prose">
+    <h2>Who we are</h2>
+    <p>{SITE.name} runs short-term rental homes in Lahore, Pakistan. Contact us about your data on WhatsApp or by phone at {SITE.phoneDisplay}.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li>When you send a booking request: your name, WhatsApp number, email address if you give one, number of guests, dates, the type of trip and your message.</li>
+      <li>When you stay: payment records for your deposit and stay.</li>
+      <li>On this website: anonymous counts of page views and of clicks on the booking, WhatsApp and phone buttons. We record the page and the event, not who you are.</li>
+    </ul>
+    <p>We do not ask for ID documents online. <mark class="placeholder">[PLACEHOLDER: if ID is checked at check-in, say whether a copy is kept, where, and for how long]</mark></p>
+
+    <h2>Why we use it</h2>
+    <p>To reply to your request, confirm and run your booking, handle payments and refunds, and keep accounts the business is required to keep.</p>
+
+    <h2>Cookies</h2>
+    <p>This website sets no advertising or tracking cookies. Our visitor statistics come from Cloudflare Web Analytics, which does not use cookies. The only cookies are a short-lived one that carries your request summary to the thank-you page, and login cookies for our own staff.</p>
+
+    <h2>Who we share it with</h2>
+    <p>Our hosting and database providers (Cloudflare and Supabase) store it for us. We do not sell or share your details for marketing. When you message us on WhatsApp, WhatsApp's own terms apply to that conversation.</p>
+
+    <h2>How long we keep it</h2>
+    <p><mark class="placeholder">[PLACEHOLDER: retention period, e.g. guest contact details deleted 24 months after checkout; financial records kept as long as the law requires]</mark></p>
+
+    <h2>Your choices</h2>
+    <p>Ask us at any time to see, correct or delete your details. We will do it unless we must keep a record by law.</p>
+  </div>
+</BaseLayout>

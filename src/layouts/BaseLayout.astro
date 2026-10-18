@@ -1,0 +1,90 @@
+---
+// Public page shell: SEO head, header, footer, WhatsApp button and the conversion beacon.
+import { Font, getImage } from 'astro:assets';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/site.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import WhatsAppFab from '../components/WhatsAppFab.astro';
+import { SITE } from '../content/site';
+import defaultShare from '../assets/photos/master-bedroom-king-bed-dha-retreat-lahore.jpeg';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Social share image (1200x630 is generated from it). */
+  shareImage?: ImageMetadata;
+  shareAlt?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+  headerVariant?: 'light' | 'dark';
+  /** Lifts the WhatsApp button above a sticky mobile booking bar. */
+  stickyBar?: boolean;
+}
+const {
+  title,
+  description,
+  shareImage = defaultShare,
+  shareAlt = 'Master bedroom at DHA Retreat, a SAHA Residences home in DHA Phase 9 Town, Lahore',
+  noindex = false,
+  jsonLd = [],
+  headerVariant = 'light',
+  stickyBar = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
+const og = await getImage({ src: shareImage, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 });
+const ogUrl = new URL(og.src, Astro.site).href;
+---
+<!doctype html>
+<html lang="en-PK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <Font cssVariable="--font-bodoni" preload />
+    <Font cssVariable="--font-jost" preload={[{ weight: 400 }]} />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#262523" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={shareAlt} />
+    <meta property="og:locale" content="en_PK" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+    <slot name="head" />
+    {jsonLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+  </head>
+  <body class:list={{ 'has-sticky-bar': stickyBar }}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader variant={headerVariant} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+    <WhatsAppFab />
+    <script is:inline>
+      // Conversion beacon (D-011): event name and path only. No cookies, no identifiers.
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest && e.target.closest('[data-event]');
+        if (!el || !navigator.sendBeacon) return;
+        navigator.sendBeacon('/api/e/', new Blob([JSON.stringify({ event: el.dataset.event, path: location.pathname })], { type: 'application/json' }));
+      }, true);
+    </script>
+  </body>
+</html>

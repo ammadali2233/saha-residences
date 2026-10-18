@@ -5,7 +5,7 @@ create extension if not exists pgtap with schema extensions;
 -- run as postgres throughout, and return to postgres (not the login role) after each role switch.
 set local role postgres;
 set local search_path = public, extensions;
-select plan(34);
+select plan(36);
 
 -- ---------------------------------------------------------------- fixtures (as postgres)
 insert into auth.users (id, email, aud, role) values
@@ -55,6 +55,11 @@ select results_eq(
 select is_empty(
   $$select * from public.public_availability('dha-retreat', '2026-12-10', '2026-12-20')$$,
   'inquiries do not block dates');
+select results_eq(
+  $$select base_rate_minor, base_currency, included_guests, max_guests, usd_pkr_rate from public.public_pricing('dha-retreat')$$,
+  $$values (6000::bigint, 'USD', 6, 8, '280.00')$$,
+  'anon can read the published pricing rules and display rate');
+select is_empty($$select * from public.public_pricing('no-such-listing')$$, 'unknown or unpublished listings return no pricing');
 select matches(
   public.submit_booking_request('dha-retreat', '2027-02-10', '2027-02-13', 4, 2, 'Test Guest', '+923001234567',
     'test@example.com', 'family', 'Arriving late', 'USD', '{"total_minor": 18000}'),
@@ -71,12 +76,14 @@ select throws_ok(
 set local role postgres;
 
 -- ---------------------------------------------------------------- admin
+-- Count as postgres first, so the check holds whatever extra rows local testing has added.
+select set_config('test.total_bookings', (select count(*) from public.bookings)::text, true);
 set local role authenticated;
 select pg_temp.act_as('11111111-1111-4111-8111-111111111111', 'aal1');
 select is_empty('select * from public.bookings', 'admin without MFA (aal1) sees nothing');
 
 select pg_temp.act_as('11111111-1111-4111-8111-111111111111', 'aal2');
-select is((select count(*) from public.bookings), 9::bigint, 'admin with MFA sees every booking');
+select is((select count(*) from public.bookings), current_setting('test.total_bookings')::bigint, 'admin with MFA sees every booking');
 select lives_ok(
   $$insert into public.payments (booking_id, kind, amount_minor, currency, fx_rate_to_pkr, received_on)
     values ('00000000-0000-4000-c000-000000000005', 'stay_payment', 15000, 'USD', 280.20, '2026-10-18')$$,

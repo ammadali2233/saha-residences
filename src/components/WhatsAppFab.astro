@@ -1,0 +1,20 @@
+---
+// Brand guide: floating button, bottom right, 16px from the edges, charcoal. Sits above the sticky booking bar.
+import Icon from './Icon.astro';
+import { whatsappLink } from '../content/site';
+---
+<a class="wa-fab" href={whatsappLink('Hello, I have a question about DHA Retreat.')} data-event="whatsapp_click" aria-label="Chat with us on WhatsApp">
+  <Icon name="message-circle" size={24} />
+</a>
+
+<style>
+  .wa-fab {
+    position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 30;
+    width: 56px; height: 56px; border-radius: var(--radius-pill);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--color-charcoal); color: var(--color-stone); box-shadow: var(--elevation-2);
+  }
+  .wa-fab:hover { background: #000; color: var(--color-stone); }
+  :global(.has-sticky-bar) .wa-fab { bottom: calc(var(--sticky-bar-height) + var(--space-4)); }
+  @media (min-width: 1024px) { :global(.has-sticky-bar) .wa-fab { bottom: var(--space-4); } }
+</style>

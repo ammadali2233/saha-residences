@@ -1,20 +1,180 @@
 ---
-// Placeholder until Phase 2 builds the public site. Kept out of search until then.
-import '../styles/tokens.css';
-import '../styles/base.css';
+import { Image, Picture, getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BookingBar from '../components/BookingBar.astro';
+import AmenityGrid from '../components/AmenityGrid.astro';
+import WhatsAppCta from '../components/WhatsAppCta.astro';
+import { DHA_RETREAT as L } from '../content/listings';
+import { organizationLd, websiteLd } from '../lib/seo';
+import logoStacked from '../assets/brand/logo-stacked-charcoal.png';
+
+const logo = await getImage({ src: logoStacked, width: 600, format: 'png' });
+const jsonLd = [websiteLd(Astro.site!), organizationLd(Astro.site!, new URL(logo.src, Astro.site).href)];
+
+// Framed hero (brand guide) with the master bedroom: the only rules-compliant photo sharp enough
+// for a hero. A split layout keeps it portrait instead of cropping it to 16:7 (D-032).
+const preview = L.photos.slice(0, 4);
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>SAHA Residences</title>
-  </head>
-  <body>
-    <main style="max-width: var(--container-text); margin: 0 auto; padding: var(--space-9) var(--space-5);">
-      <h1>SAHA Residences</h1>
-      <p>Our website is being built. For bookings, message us on WhatsApp at <a href="https://wa.me/923205361616">+92 320 5361616</a>.</p>
-    </main>
-  </body>
-</html>
+<BaseLayout
+  title="Three-bedroom house to rent in DHA Phase 9, Lahore | SAHA Residences"
+  description="Book DHA Retreat directly: a three-bedroom house in DHA Phase 9 Town, Lahore, with solar backup, a caretaker on site and room for up to 8 guests. From USD 60 a night."
+  headerVariant="dark"
+  jsonLd={jsonLd}
+>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container-wide hero-grid">
+      <Picture
+        class="hero-photo"
+        src={L.hero.mobile.src}
+        alt={L.hero.mobile.alt}
+        formats={['avif', 'webp']}
+        widths={[400, 600, 800, 1086]}
+        sizes="(max-width: 767px) 100vw, (max-width: 1440px) 42vw, 600px"
+        loading="eager"
+        fetchpriority="high"
+        pictureAttributes={{ class: 'hero-picture' }}
+      />
+      <div class="hero-text">
+        <div class="stack-3">
+          <span class="eyebrow on-dark">{L.name} · {L.area}</span>
+          <h1 id="hero-title">{L.headline}</h1>
+          <p class="sub">{L.summary}</p>
+        </div>
+        <BookingBar slug={L.slug} maxGuests={L.facts.maxGuests} tone="dark" id="hero" />
+      </div>
+    </div>
+    <ul class="facts container-wide" aria-label="At a glance">
+      <li>{L.facts.bedrooms} bedrooms</li>
+      <li>{L.facts.bathrooms} bathrooms</li>
+      <li>Sleeps {L.facts.sleeps}, up to {L.facts.maxGuests}</li>
+      <li>Solar and UPS backup</li>
+      <li>Caretaker on site</li>
+      <li>From <strong>{L.priceFrom.amount}</strong> a night</li>
+    </ul>
+  </section>
+
+  <section class="section container" aria-labelledby="why-title">
+    <h2 id="why-title" class="visually-hidden">Why guests choose DHA Retreat</h2>
+    <ul class="highlights">
+      {L.highlights.map((h) => (
+        <li class="card">
+          <h3>{h.title}</h3>
+          <p class="muted">{h.body}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section container" aria-labelledby="inside-title">
+    <div class="section-head">
+      <div class="titles">
+        <span class="eyebrow">The house</span>
+        <h2 id="inside-title">Inside DHA Retreat</h2>
+      </div>
+      <a class="btn btn-secondary" href={`/stays/${L.slug}/gallery/`}>View all photos</a>
+    </div>
+    <ul class="mosaic">
+      {preview.map((p, i) => (
+        <li class:list={{ big: i === 0 }}>
+          <Image src={p.src} alt={p.alt} widths={i === 0 ? [600, 900, 1200] : [400, 600]} sizes={i === 0 ? '(max-width: 767px) 100vw, 50vw' : '(max-width: 767px) 50vw, 25vw'} />
+        </li>
+      ))}
+    </ul>
+    <ul class="captions">
+      {preview.map((p) => <li>{p.caption}</li>)}
+    </ul>
+  </section>
+
+  <section class="section container" aria-labelledby="amenities-title">
+    <div class="section-head">
+      <div class="titles">
+        <span class="eyebrow">What's included</span>
+        <h2 id="amenities-title">Everything you need for a longer stay</h2>
+      </div>
+      <a class="text-link" href={`/stays/${L.slug}/#amenities`}>See the full house</a>
+    </div>
+    <AmenityGrid amenities={L.amenities.slice(0, 6)} />
+  </section>
+
+  <section class="section container">
+    <div class="direct">
+      <div class="stack-2">
+        <h2>Book direct with the people who look after the house</h2>
+        <p>No platform in the middle and no platform fees on top of our rate. Pay a {L.depositPct}% security deposit to confirm, returned after checkout, and the stay itself when you arrive.</p>
+      </div>
+      <a class="btn btn-white" href={`/book/?stay=${L.slug}`} data-event="booking_started">Check dates</a>
+    </div>
+  </section>
+
+  <section class="section container" aria-labelledby="reviews-title">
+    <div class="section-head">
+      <div class="titles">
+        <span class="eyebrow">Guests</span>
+        <h2 id="reviews-title">What guests say</h2>
+      </div>
+    </div>
+    <p class="card"><mark class="placeholder">[PLACEHOLDER: 2 or 3 real guest reviews, quoted word for word with first name, initial, month and source (e.g. Airbnb), linked to the public listing]</mark></p>
+  </section>
+
+  <section class="section container location" aria-labelledby="location-title">
+    <div class="stack-4">
+      <span class="eyebrow">Location</span>
+      <h2 id="location-title">In DHA Phase 9 Town, Lahore</h2>
+      <p class="lede">A residential part of DHA Lahore, about 25 minutes by car from the airport and 15 minutes from Dolmen Mall and DHA Raya.</p>
+      <a class="text-link" href="/location/">Distances and the neighbourhood</a>
+    </div>
+    <ul class="list-rows">
+      {L.nearby.slice(0, 4).map((n) => <li><span>{n.place}</span><span class="muted">{n.time} drive</span></li>)}
+    </ul>
+  </section>
+
+  <div class="section container">
+    <WhatsAppCta />
+  </div>
+</BaseLayout>
+
+<style>
+  .hero { background: var(--color-charcoal); color: var(--color-stone); }
+  .hero-grid { display: grid; }
+  :global(.hero-picture) { display: block; margin: 0 calc(-1 * var(--gutter)); }
+  :global(.hero-photo) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; max-height: 70vh; object-fit: cover; object-position: center 60%; }
+  .hero-text { display: grid; gap: var(--space-6); padding: var(--space-6) 0 var(--space-7); align-content: end; }
+  .eyebrow.on-dark { color: var(--color-muted-dark); }
+  .hero h1 { color: var(--color-stone); }
+  .sub { font-size: var(--type-body-lg-size); line-height: var(--type-body-lg-line); color: var(--color-muted-dark); max-width: 520px; }
+  .facts { list-style: none; margin: 0 auto; display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); padding-top: var(--space-4); padding-bottom: var(--space-4); border-top: 1px solid var(--color-line-dark); font-size: 14px; color: var(--color-muted-dark); }
+  .facts strong { color: var(--color-stone); font-weight: 500; }
+  @media (min-width: 768px) {
+    .hero-grid { grid-template-columns: 5fr 7fr; gap: var(--space-7); align-items: stretch; padding-top: var(--space-6); padding-bottom: var(--space-6); }
+    :global(.hero-picture) { margin: 0; }
+    :global(.hero-photo) { border-radius: var(--radius-md); max-height: 640px; }
+    .hero-grid { grid-auto-flow: dense; }
+    :global(.hero-picture) { grid-column: 2; }
+    .hero-text { grid-column: 1; grid-row: 1; padding: 0; align-content: center; }
+  }
+  @media (min-width: 1024px) { .hero-grid { grid-template-columns: 6fr 5fr; } }
+
+  .highlights { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--space-5); }
+  .highlights h3 { font-size: var(--type-h4-size); line-height: var(--type-h4-line); margin-bottom: var(--space-2); }
+
+  .mosaic { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .mosaic li { aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius-md); }
+  .mosaic li.big { grid-column: span 2; aspect-ratio: 16 / 10; }
+  .mosaic :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (min-width: 768px) {
+    .mosaic { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(140px, 15vw); }
+    .mosaic li, .mosaic li.big { aspect-ratio: auto; }
+    .mosaic li.big { grid-row: span 2; }
+  }
+  .captions { list-style: none; padding: 0; margin: var(--space-5) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); font-size: 14px; color: var(--color-muted); }
+
+  .direct { background: var(--color-olive); color: var(--color-white); border-radius: var(--radius-md); padding: var(--space-6) var(--space-5); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-5); }
+  .direct h2 { font-size: var(--type-h3-size); line-height: var(--type-h3-line); color: var(--color-white); max-width: 22ch; }
+  .direct p { max-width: 62ch; font-size: 15px; line-height: 1.6; }
+  .btn-white { background: var(--color-white); color: var(--color-charcoal); }
+  .btn-white:hover { background: var(--color-stone); color: var(--color-charcoal); }
+  .direct :focus-visible { outline-color: var(--color-white); }
+
+  .location { display: grid; gap: var(--space-6); }
+  @media (min-width: 1024px) { .location { grid-template-columns: 1fr 1fr; align-items: start; } }
+</style>

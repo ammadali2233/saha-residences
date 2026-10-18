@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BookingForm from '../../components/BookingForm.tsx';
+import { DHA_RETREAT as L } from '../../content/listings';
+import { SITE } from '../../content/site';
+import { breadcrumbLd } from '../../lib/seo';
+---
+<BaseLayout
+  title="Book DHA Retreat directly"
+  description="Check availability for DHA Retreat in DHA Phase 9, Lahore, see the full price in USD or PKR, and send a booking request. No platform fees. 20% security deposit to confirm."
+  jsonLd={[breadcrumbLd([{ name: 'Book', url: new URL(Astro.url.pathname, Astro.site) }])]}
+>
+  <div class="container page-head">
+    <span class="eyebrow">{L.name} · {L.area}</span>
+    <h1>Book directly with us</h1>
+    <p class="lede">Choose your dates, see the full price, and send a request. We confirm on WhatsApp, usually the same day. <mark class="placeholder">[PLACEHOLDER: confirm reply time]</mark></p>
+  </div>
+
+  <div class="container section book-wrap">
+    <BookingForm
+      client:only="preact"
+      slug={L.slug}
+      name={L.name}
+      maxGuests={L.facts.maxGuests}
+      includedGuests={L.facts.sleeps}
+      depositPct={L.depositPct}
+      whatsappNumber={SITE.whatsappNumber}
+    >
+      <div slot="fallback" class="loading-shell" aria-hidden="true"></div>
+    </BookingForm>
+
+    <noscript>
+      <form class="panel nojs" method="post" action="/api/booking-request/">
+        <h2 class="panel-title">Send a booking request</h2>
+        <p class="hint">USD 60 per night for up to 6 guests. Guests 7 and 8: PKR 1,000 per extra bedding per night. We confirm the total and availability on WhatsApp.</p>
+        <input type="hidden" name="stay" value={L.slug} />
+        <div class="fields">
+          <div class="field"><label class="label" for="n-in">Check in</label><input id="n-in" name="checkin" type="date" required /></div>
+          <div class="field"><label class="label" for="n-out">Check out</label><input id="n-out" name="checkout" type="date" required /></div>
+          <div class="field"><label class="label" for="n-g">Guests</label><select id="n-g" name="guests">{Array.from({ length: L.facts.maxGuests }, (_, i) => <option value={i + 1}>{i + 1}</option>)}</select></div>
+          <div class="field"><label class="label" for="n-c">Currency</label><select id="n-c" name="currency"><option>USD</option><option>PKR</option></select></div>
+          <div class="field"><label class="label" for="n-name">Full name</label><input id="n-name" name="name" required autocomplete="name" /></div>
+          <div class="field"><label class="label" for="n-phone">WhatsApp number with country code</label><input id="n-phone" name="phone" type="tel" required autocomplete="tel" /></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Send request</button>
+      </form>
+    </noscript>
+
+    <aside class="side">
+      <div class="card stack-3">
+        <h2 class="side-title">How booking works</h2>
+        <ol class="steps">
+          <li>Send your request. Nothing is charged.</li>
+          <li>We confirm your dates on WhatsApp.</li>
+          <li>Pay the {L.depositPct}% security deposit by bank transfer or Raast. Your dates are then held.</li>
+          <li>Pay for your stay at check-in. Your deposit comes back after checkout.</li>
+        </ol>
+        <a class="text-link" href="/house-rules/">House rules, payment and cancellation</a>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .book-wrap { display: grid; gap: var(--space-6); }
+  @media (min-width: 1024px) { .book-wrap { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; } .side { position: sticky; top: var(--space-5); } }
+  .loading-shell { min-height: 900px; }
+  .side-title { font-family: var(--font-sans); font-size: var(--type-h5-size); line-height: var(--type-h5-line); font-weight: 500; }
+  .steps { padding-left: var(--space-5); margin: 0; display: grid; gap: var(--space-2); font-size: 15px; }
+</style>
+
+<style is:global>
+  /* Book page island (Preact renders this markup, so the styles are global but scoped by class). */
+  .booking { display: grid; gap: var(--space-5); }
+  .panel { background: var(--color-stone-50); box-shadow: var(--elevation-1); border-radius: var(--radius-md); padding: var(--space-5); display: grid; gap: var(--space-4); }
+  .panel-title { font-family: var(--font-sans); font-size: var(--type-h5-size); line-height: var(--type-h5-line); font-weight: 500; }
+  .booking .hint, .panel .hint { font-size: 13px; line-height: 20px; color: var(--color-muted); margin: 0; }
+  .booking .hint.center { text-align: center; }
+  .booking .warn { color: var(--color-charcoal); background: var(--color-stone-200); padding: var(--space-3); border-radius: var(--radius-sm); font-size: 14px; }
+  .booking .error { color: var(--color-error); font-weight: 500; margin: 0; }
+
+  .cal { max-width: 420px; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; }
+  .cal-title { font-weight: 500; }
+  .cal .nav { width: 44px; height: 44px; border: 0; background: transparent; font-size: 24px; border-radius: var(--radius-sm); cursor: pointer; color: var(--color-charcoal); }
+  .cal .nav:hover:not(:disabled) { background: var(--color-stone); }
+  .cal .nav:disabled { color: var(--color-muted-dark); cursor: default; }
+  .dow, .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .dow { font-size: 12px; color: var(--color-muted); text-align: center; margin: var(--space-2) 0; }
+  .day { height: 44px; border: 0; background: transparent; border-radius: var(--radius-sm); font: inherit; font-size: 15px; color: var(--color-charcoal); cursor: pointer; }
+  .day:hover:not([aria-disabled='true']) { background: var(--color-stone); }
+  .day[aria-disabled='true'] { color: var(--color-line-strong); cursor: not-allowed; }
+  .day.booked { text-decoration: line-through; }
+  .day.range { background: var(--color-stone-200); }
+  .day.end { background: var(--color-walnut); color: var(--color-white); }
+  .legend { display: flex; flex-wrap: wrap; gap: var(--space-4); font-size: 12px; color: var(--color-muted); border-top: 1px solid var(--color-line); padding-top: var(--space-3); margin-top: var(--space-3); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+  .sw.sel { background: var(--color-walnut); }
+  .sw.rng { background: var(--color-stone-200); }
+
+  .booking .row { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; }
+  .stepper { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-2) 0; }
+  .stepper button { width: 44px; height: 44px; border: 1px solid var(--color-line-strong); background: transparent; border-radius: var(--radius-sm); font-size: 20px; cursor: pointer; color: var(--color-charcoal); }
+  .stepper button:disabled { color: var(--color-line-strong); border-color: var(--color-line); cursor: default; }
+  .stepper output { min-width: 8ch; text-align: center; font-size: 16px; }
+  .currency { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .currency legend { margin-bottom: var(--space-2); }
+  .currency label { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4); border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm); cursor: pointer; }
+  .currency label.on { border-color: var(--color-charcoal); box-shadow: 0 0 0 1px var(--color-charcoal); }
+  .currency input { accent-color: var(--color-walnut); width: 18px; height: 18px; margin: 0; }
+
+  .lines { margin: 0; display: grid; gap: var(--space-3); font-size: 15px; }
+  .lines div { display: flex; justify-content: space-between; gap: var(--space-4); }
+  .lines dd { margin: 0; text-align: right; white-space: nowrap; }
+  .lines .nofee { color: var(--color-olive); }
+  .lines .total { border-top: 1px solid var(--color-charcoal); padding-top: var(--space-3); font-weight: 500; font-size: 17px; }
+  .lines .deposit { color: var(--color-muted); font-size: 14px; }
+
+  .fields { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field.wide { grid-column: 1 / -1; }
+  .field input, .field select, .field textarea {
+    min-height: var(--control-height); padding: 0 var(--space-4); font: inherit; font-size: 16px; color: var(--color-charcoal);
+    background: var(--color-stone-50); border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm);
+  }
+  .field textarea { padding: var(--space-3) var(--space-4); resize: vertical; }
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+</style>

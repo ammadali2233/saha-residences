@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+import { SITE, whatsappLink } from '../content/site';
+
+interface Props {
+  title?: string;
+  message?: string;
+}
+const { title = 'Questions before you book?', message = 'Hello, I have a question about DHA Retreat.' } = Astro.props;
+---
+<aside class="wa-cta" aria-label="Contact us on WhatsApp">
+  <h2 class="title">{title}</h2>
+  <p class="body">Message the SAHA team directly. A real person in Lahore will reply.</p>
+  <a class="btn btn-on-dark" href={whatsappLink(message)} data-event="whatsapp_click"><Icon name="message-circle" size={20} /> Chat on WhatsApp</a>
+  <p class="number">Or call <a href={`tel:${SITE.phoneE164}`} data-event="phone_click">{SITE.phoneDisplay}</a></p>
+</aside>
+
+<style>
+  .wa-cta { background: var(--color-charcoal); color: var(--color-stone); border-radius: var(--radius-md); padding: var(--space-6) var(--space-5); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+  .title { font-size: var(--type-h3-size); line-height: var(--type-h3-line); }
+  .body { color: var(--color-muted-dark); font-size: 15px; line-height: 1.6; }
+  .btn { gap: var(--space-2); }
+  .number { font-size: 13px; color: var(--color-muted-dark); }
+  .number a { color: var(--color-stone); }
+  :focus-visible { outline-color: var(--color-stone); }
+</style>

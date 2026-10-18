@@ -1,0 +1,59 @@
+---
+// Visible FAQ only. No FAQPage markup (D-012).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WhatsAppCta from '../components/WhatsAppCta.astro';
+import Placeholdered from '../components/Placeholdered.astro';
+import { breadcrumbLd } from '../lib/seo';
+
+const faqs = [
+  { q: 'Does the house have power during load shedding?', a: 'Yes. Solar panels and a UPS keep the lights, fans and Wi-Fi running. [PLACEHOLDER: does the backup run air conditioning?]' },
+  { q: 'How many guests can stay?', a: 'Up to 8. The beds sleep 6 (a king, a queen and two singles), and guests 7 and 8 sleep on extra bedding at PKR 1,000 per bedding per night.' },
+  { q: 'How much does it cost?', a: 'USD 60 per night for up to 6 guests, plus PKR 1,000 per extra bedding per night for guests 7 and 8. There are no cleaning or platform fees. The Book page shows the full total before you send a request.' },
+  { q: 'Can I pay in Pakistani rupees?', a: 'Yes. You can see prices and pay in USD or PKR. We convert at one fixed rate that we show on the Book page.' },
+  { q: 'How do I pay?', a: 'To confirm, you pay a 20% security deposit by bank transfer or Raast. It is returned after checkout once we have checked the house. You pay the full stay price when you check in. [PLACEHOLDER: accepted payment methods at check-in, e.g. cash, bank transfer]' },
+  { q: 'Is booking here the same as booking on Airbnb?', a: 'It is the same house and the same team. Booking directly means you deal with us, with no platform fees on top of our rate.' },
+  { q: 'How far is the airport?', a: 'Allama Iqbal International Airport is about 25 minutes by car. [PLACEHOLDER: airport pickup available?]' },
+  { q: 'Is there parking?', a: 'Yes, a covered car porch inside the gate, with exterior security cameras.' },
+  { q: 'Can I work from the house?', a: 'Yes. The games room has a study table, and there is Wi-Fi throughout the house. [PLACEHOLDER: internet speed]' },
+  { q: 'What time is check-in and check-out?', a: '[PLACEHOLDER: check-in and check-out times, and whether early or late times are possible]' },
+  { q: 'What is the cancellation policy?', a: '[PLACEHOLDER: cancellation terms, including what happens to the deposit]' },
+  { q: 'Are children and pets welcome?', a: 'Families are welcome: the house has three bedrooms and room for up to 8. [PLACEHOLDER: cots or high chairs? pets allowed?]' },
+];
+---
+<BaseLayout
+  title="Questions about DHA Retreat"
+  description="Answers about DHA Retreat in DHA Phase 9, Lahore: power backup, guest numbers, prices in USD or PKR, the 20% security deposit, parking, workspace and the airport."
+  jsonLd={[breadcrumbLd([{ name: 'FAQ', url: new URL(Astro.url.pathname, Astro.site) }])]}
+>
+  <div class="container-text page-head">
+    <span class="eyebrow">FAQ</span>
+    <h1>Questions about DHA Retreat</h1>
+    <p class="lede">Straight answers about the house, prices and payment. If yours isn't here, ask us on WhatsApp.</p>
+  </div>
+
+  <div class="container-text section">
+    <div class="faq">
+      {faqs.map((f, i) => (
+        <details open={i === 0}>
+          <summary><h2>{f.q}</h2></summary>
+          <p><Placeholdered text={f.a} /></p>
+        </details>
+      ))}
+    </div>
+  </div>
+
+  <div class="section container-text">
+    <WhatsAppCta title="Still have a question?" />
+  </div>
+</BaseLayout>
+
+<style>
+  .faq { border-top: 1px solid var(--color-charcoal); }
+  details { border-bottom: 1px solid var(--color-line); }
+  summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-5) 0; min-height: var(--control-touch-min); }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; font-size: 24px; line-height: 1; flex: none; transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  summary h2 { font-family: var(--font-sans); font-size: 17px; line-height: 26px; font-weight: 500; }
+  details p { padding: 0 var(--space-7) var(--space-5) 0; font-size: 15px; line-height: 1.65; color: var(--color-muted); }
+</style>

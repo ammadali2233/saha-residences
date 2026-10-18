@@ -1,0 +1,8 @@
+---
+// Renders copy and highlights any "[PLACEHOLDER: ...]" so unconfirmed facts are impossible to miss.
+interface Props {
+  text: string;
+}
+const parts = Astro.props.text.split(/(\[PLACEHOLDER:[^\]]*\])/);
+---
+{parts.map((p) => (p.startsWith('[PLACEHOLDER:') ? <mark class="placeholder">{p}</mark> : p))}

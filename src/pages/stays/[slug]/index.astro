@@ -1,0 +1,188 @@
+---
+import { Image, getImage } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import AmenityGrid from '../../../components/AmenityGrid.astro';
+import VideoFacade from '../../../components/VideoFacade.astro';
+import WhatsAppCta from '../../../components/WhatsAppCta.astro';
+import Placeholdered from '../../../components/Placeholdered.astro';
+import Icon from '../../../components/Icon.astro';
+import { LISTINGS, type Listing } from '../../../content/listings';
+import { whatsappLink } from '../../../content/site';
+import { breadcrumbLd, vacationRentalLd } from '../../../lib/seo';
+
+export function getStaticPaths() {
+  return LISTINGS.map((listing) => ({ params: { slug: listing.slug }, props: { listing } }));
+}
+
+const { listing: L } = Astro.props as { listing: Listing };
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const images = await Promise.all(L.photos.map((p) => getImage({ src: p.src, width: 1200, format: 'jpg' })));
+const jsonLd = [
+  vacationRentalLd(L, pageUrl, images.map((i) => new URL(i.src, Astro.site).href)),
+  breadcrumbLd([
+    { name: 'Stays', url: new URL('/stays/', Astro.site) },
+    { name: L.name, url: pageUrl },
+  ]),
+];
+const bookHref = `/book/?stay=${L.slug}`;
+---
+<BaseLayout
+  title={`${L.name}: 3-bedroom house in DHA Phase 9, Lahore`}
+  description={`${L.name} sleeps 6 in beds and up to 8 with extra bedding, with solar and UPS backup, a games room, a workspace and a caretaker on site. From ${L.priceFrom.amount} a night.`}
+  shareImage={L.photos[0].src}
+  shareAlt={L.photos[0].alt}
+  jsonLd={jsonLd}
+  stickyBar
+>
+  <div class="container page-head">
+    <Breadcrumbs items={[{ name: 'Stays', href: '/stays/' }, { name: L.name, href: pageUrl.pathname }]} />
+    <h1>{L.name}</h1>
+    <p class="muted facts">Entire house · {L.area} · {L.facts.bedrooms} bedrooms · {L.facts.bathrooms} bathrooms · Sleeps {L.facts.sleeps}, up to {L.facts.maxGuests}</p>
+  </div>
+
+  <div class="container strip-wrap">
+    <ul class="strip">
+      {L.photos.map((p, i) => (
+        <li class:list={{ first: i === 0 }}>
+          <Image src={p.src} alt={p.alt} widths={i === 0 ? [600, 900, 1086] : [400, 600]} sizes={i === 0 ? '(max-width: 767px) 100vw, 50vw' : '(max-width: 767px) 50vw, 25vw'} loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'auto'} />
+        </li>
+      ))}
+    </ul>
+    <a class="btn btn-secondary all-photos" href={`/stays/${L.slug}/gallery/`}><Icon name="image" size={20} /> View all photos</a>
+  </div>
+
+  <div class="container layout">
+    <div class="content">
+      <section class="stack-4" aria-labelledby="overview">
+        <h2 id="overview">The house</h2>
+        <p class="lede">{L.summary} It works well for families, visiting relatives and teams in Lahore for work.</p>
+        <ul class="highlights">
+          {L.highlights.map((h) => <li><strong>{h.title}.</strong> {h.body}</li>)}
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="rooms">
+        <h2 id="rooms">Room by room</h2>
+        <ul class="rooms">
+          {L.rooms.map((r) => (
+            <li>
+              {r.photo ? (
+                <Image src={r.photo.src} alt={r.photo.alt} widths={[300, 600]} sizes="(max-width: 767px) 40vw, 200px" class="room-photo" />
+              ) : (
+                <div class="room-photo missing"><span>Photo coming</span></div>
+              )}
+              <div>
+                <h3>{r.name}</h3>
+                {r.beds !== 'No beds' && <p class="beds"><Icon name="bed-double" size={18} /> {r.beds}</p>}
+                <p class="muted"><Placeholdered text={r.detail} /></p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p class="caption">Sleeping: king, queen and two singles for 6 guests. {L.extraBedding}</p>
+      </section>
+
+      <section class="section" aria-labelledby="amenities-h" id="amenities">
+        <h2 id="amenities-h">Amenities</h2>
+        <AmenityGrid amenities={L.amenities} />
+      </section>
+
+      <section class="section stack-4" aria-labelledby="tour">
+        <h2 id="tour">Video tour</h2>
+        <VideoFacade videoId={L.videoId} poster={L.photos[0].src} title={`Video tour of ${L.name}`} />
+      </section>
+
+      <section class="section stack-4" aria-labelledby="rules">
+        <h2 id="rules">House rules</h2>
+        <ul class="rules">
+          {L.rules.map((r) => (
+            <li><Icon name={r.icon} size={20} /><div><strong>{r.title}</strong><span class="muted"><Placeholdered text={r.detail} /></span></div></li>
+          ))}
+        </ul>
+        <p><a class="text-link" href="/house-rules/">Full house rules, payment and cancellation</a></p>
+      </section>
+
+      <section class="section stack-4" aria-labelledby="nearby">
+        <h2 id="nearby">What's nearby</h2>
+        <ul class="list-rows">
+          {L.nearby.map((n) => <li><span>{n.place}</span><span class="muted">{n.time}</span></li>)}
+        </ul>
+        <p class="caption">Approximate drive times. <mark class="placeholder">[PLACEHOLDER: confirm drive times]</mark> <a href="/location/">More about the location</a></p>
+      </section>
+    </div>
+
+    <aside class="widget-col" aria-label="Book this house">
+      <div class="widget">
+        <p class="price"><span class="amount">{L.priceFrom.amount}</span> <span class="muted">{L.priceFrom.note}</span></p>
+        <p class="caption">{L.extraBedding} No platform fees.</p>
+        <a class="btn btn-primary btn-block" href={bookHref} data-event="booking_started">Check dates</a>
+        <a class="btn btn-secondary btn-block" href={whatsappLink(`Hello, I'd like to ask about ${L.name}.`)} data-event="whatsapp_click"><Icon name="message-circle" size={18} /> Ask on WhatsApp</a>
+        <ul class="terms">
+          <li><Icon name="shield-check" size={16} /> {L.depositPct}% security deposit to confirm, returned after checkout</li>
+          <li><Icon name="receipt" size={16} /> Stay paid in full at check-in, in USD or PKR</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <div class="section container">
+    <WhatsAppCta message={`Hello, I'd like to ask about ${L.name}.`} />
+  </div>
+
+  <div class="sticky-bar">
+    <div><strong>{L.priceFrom.amount}</strong> <span class="muted">/ night</span><br /><span class="caption">No platform fees</span></div>
+    <a class="btn btn-primary" href={bookHref} data-event="booking_started">Check dates</a>
+  </div>
+</BaseLayout>
+
+<style>
+  .facts { margin-top: var(--space-2); }
+  .strip-wrap { position: relative; margin-top: var(--space-5); }
+  .strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .strip li { aspect-ratio: 4 / 3; border-radius: var(--radius-md); overflow: hidden; }
+  .strip li.first { grid-column: span 2; aspect-ratio: 4 / 3; }
+  .strip :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .all-photos { position: absolute; right: calc(var(--gutter) + var(--space-3)); bottom: var(--space-3); background: var(--color-stone-50); gap: var(--space-2); }
+  @media (min-width: 768px) {
+    .strip { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(160px, 16vw)); }
+    .strip li, .strip li.first { aspect-ratio: auto; }
+    .strip li.first { grid-column: 1; grid-row: span 2; }
+    .strip li:nth-child(4) { grid-column: 2 / 4; }
+  }
+
+  .layout { display: grid; gap: var(--space-7); margin-top: var(--space-7); }
+  @media (min-width: 1024px) { .layout { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; } }
+  .content h2 { font-size: var(--type-h3-size); line-height: var(--type-h3-line); }
+  .highlights { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-3); }
+
+  .rooms { list-style: none; padding: 0; margin: var(--space-5) 0 0; display: grid; gap: var(--space-5); }
+  .rooms li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+  @media (min-width: 768px) { .rooms li { grid-template-columns: 200px minmax(0, 1fr); } }
+  .rooms h3 { font-family: var(--font-sans); font-size: var(--type-h5-size); line-height: var(--type-h5-line); font-weight: 500; }
+  :global(.room-photo) { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-sm); display: block; }
+  .room-photo.missing { background: var(--color-stone-200); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--color-muted); }
+  .beds { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-1) 0; }
+  .rooms + .caption { margin-top: var(--space-4); }
+
+  .rules { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--color-charcoal); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 var(--space-5); }
+  .rules li { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-line); }
+  .rules li :global(svg) { flex: none; }
+  .rules div { display: flex; flex-direction: column; font-size: 15px; }
+  .rules strong { font-weight: 500; }
+  .rules span { font-size: 13px; }
+
+  .widget-col { display: none; }
+  @media (min-width: 1024px) { .widget-col { display: block; position: sticky; top: var(--space-5); } }
+  .widget { background: var(--color-stone-50); box-shadow: var(--elevation-1); border-radius: var(--radius-md); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4); }
+  .price { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+  .amount { font-family: var(--font-display); font-size: 30px; line-height: 1.1; }
+  .widget .btn { gap: var(--space-2); }
+  .terms { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); font-size: 13px; color: var(--color-muted); }
+  .terms li { display: flex; gap: var(--space-2); align-items: flex-start; }
+  .terms :global(svg) { flex: none; margin-top: 2px; color: var(--color-olive); }
+
+  .sticky-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; height: var(--sticky-bar-height); background: var(--color-stone-50); border-top: 1px solid var(--color-line); box-shadow: var(--elevation-2); display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); }
+  .sticky-bar strong { font-weight: 500; font-size: 16px; }
+  @media (min-width: 1024px) { .sticky-bar { display: none; } }
+</style>

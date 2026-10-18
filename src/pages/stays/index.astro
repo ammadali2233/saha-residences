@@ -1,0 +1,37 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LISTINGS } from '../../content/listings';
+---
+<BaseLayout
+  title="Stays in Lahore"
+  description="SAHA Residences homes in Lahore, booked directly with the people who look after them. DHA Retreat: three bedrooms in DHA Phase 9 Town, from USD 60 a night."
+>
+  <div class="container page-head">
+    <span class="eyebrow">SAHA Residences</span>
+    <h1>Stays in Lahore</h1>
+    <p class="lede">Well-kept homes, booked directly with the people who look after them. More homes are coming.</p>
+  </div>
+  <ul class="container section cards">
+    {LISTINGS.map((l) => (
+      <li>
+        <a href={`/stays/${l.slug}/`} class="card-link">
+          <Image src={l.photos[0].src} alt={l.photos[0].alt} widths={[400, 600, 800]} sizes="(max-width: 767px) 100vw, 400px" />
+          <h2>{l.name}</h2>
+        </a>
+        <p class="muted">{l.area} · {l.facts.bedrooms} bedrooms · Sleeps {l.facts.sleeps}, up to {l.facts.maxGuests}</p>
+        <p><strong>From {l.priceFrom.amount}</strong> per night</p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  .cards { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-6); }
+  .cards li > * + * { margin-top: var(--space-2); }
+  .card-link { color: inherit; text-decoration: none; display: block; }
+  .card-link :global(img) { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-md); display: block; }
+  .card-link h2 { font-size: 24px; line-height: 30px; margin-top: var(--space-3); }
+  .card-link:hover h2 { text-decoration: underline; }
+  strong { font-weight: 500; }
+</style>

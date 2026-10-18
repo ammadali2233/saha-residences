@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { SUMMARY_COOKIE, type RequestSummary } from '../../lib/booking';
+import { formatMoney } from '../../lib/pricing/quote';
+import { listingBySlug } from '../../content/listings';
+import { SITE, whatsappLink } from '../../content/site';
+
+export const prerender = false;
+
+let summary: RequestSummary | null = null;
+try {
+  const raw = Astro.cookies.get(SUMMARY_COOKIE)?.value;
+  summary = raw ? (JSON.parse(decodeURIComponent(raw)) as RequestSummary) : null;
+} catch {
+  summary = null;
+}
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+
+const listing = summary ? listingBySlug(summary.slug) : undefined;
+const fmt = (d: string) =>
+  new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const stayLine = summary
+  ? `${fmt(summary.checkIn)} to ${fmt(summary.checkOut)} (${summary.nights} ${summary.nights === 1 ? 'night' : 'nights'}), ${summary.guests} ${summary.guests === 1 ? 'guest' : 'guests'}`
+  : '';
+// The guest's own opening message. Booking details only; no personal data we hold.
+const waText = summary
+  ? `Assalam o Alaikum. I've sent booking request ${summary.ref} for ${listing?.name ?? 'DHA Retreat'}: ${stayLine}. Quoted total ${formatMoney(summary.totalMinor, summary.currency)}. Please let me know the next step.`
+  : 'Hello, I sent a booking request on your website.';
+---
+<BaseLayout title="Request received" description="Your booking request has been sent to SAHA Residences." noindex>
+  <div class="container-text page-head stack-5">
+    {summary ? (
+      <>
+        <span class="eyebrow">Request {summary.ref}</span>
+        <h1>Thank you, {summary.name}. We have your request.</h1>
+        <p class="lede">Your dates aren't held yet. Continue on WhatsApp and we'll confirm availability and send payment details for the {listing?.depositPct ?? 20}% security deposit.</p>
+        <a class="btn btn-primary btn-main-mobile" href={whatsappLink(waText)} data-event="whatsapp_click"><Icon name="message-circle" size={20} /> Continue on WhatsApp</a>
+        <dl class="summary card">
+          <div><dt>Stay</dt><dd>{listing?.name ?? summary.slug}</dd></div>
+          <div><dt>Dates</dt><dd>{stayLine}</dd></div>
+          <div><dt>Quoted total</dt><dd>{formatMoney(summary.totalMinor, summary.currency)}, paid at check-in</dd></div>
+          <div><dt>Security deposit</dt><dd>{formatMoney(summary.depositMinor, summary.currency)} to confirm, returned after checkout</dd></div>
+        </dl>
+        <p class="caption">Prefer to call? <a href={`tel:${SITE.phoneE164}`} data-event="phone_click">{SITE.phoneDisplay}</a></p>
+      </>
+    ) : (
+      <>
+        <h1>Thank you. We have your request.</h1>
+        <p class="lede">Message us on WhatsApp and we'll confirm availability and the next step.</p>
+        <a class="btn btn-primary" href={whatsappLink(waText)} data-event="whatsapp_click">Continue on WhatsApp</a>
+      </>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .btn { gap: var(--space-2); }
+  .summary { margin: 0; display: grid; gap: var(--space-3); }
+  .summary div { display: grid; grid-template-columns: minmax(110px, 30%) 1fr; gap: var(--space-3); }
+  dt { color: var(--color-muted); font-size: 14px; }
+  dd { margin: 0; }
+</style>

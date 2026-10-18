@@ -19,7 +19,9 @@
     "test:e2e": "playwright test",
     "test:auth": "node --env-file=.dev.vars tests/e2e/admin-auth.mjs",
     "admin:create": "node --env-file=.dev.vars scripts/create-admin.mjs",
-    "backup:drill": "node scripts/restore-drill.mjs"
+    "backup:drill": "node scripts/restore-drill.mjs",
+    "check:copy": "node scripts/check-copy.mjs",
+    "lighthouse": "node scripts/lighthouse.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.0",
@@ -34,6 +36,8 @@
     "@astrojs/check": "0.9.10",
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
+    "lighthouse": "13.5.0",
+    "lucide-static": "1.59.0",
     "supabase": "2.121.0",
     "typescript": "6.0.3",
     "vitest": "5.0.5",

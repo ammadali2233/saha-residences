@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Placeholdered from '../components/Placeholdered.astro';
+import { DHA_RETREAT as L } from '../content/listings';
+import { breadcrumbLd } from '../lib/seo';
+---
+<BaseLayout
+  title="House rules, payment and cancellation"
+  description="House rules for DHA Retreat, how payment works (a 20% security deposit to confirm, the stay paid at check-in) and the cancellation policy."
+  jsonLd={[breadcrumbLd([{ name: 'House rules', url: new URL(Astro.url.pathname, Astro.site) }])]}
+>
+  <div class="container-text page-head">
+    <span class="eyebrow">Before you book</span>
+    <h1>House rules, payment and cancellation</h1>
+    <p class="lede">Everything that applies to your stay, in plain words.</p>
+  </div>
+
+  <div class="container-text section">
+    <h2 class="h">House rules</h2>
+    <ul class="rules">
+      {L.rules.map((r) => (
+        <li><Icon name={r.icon} size={20} /><div><strong>{r.title}</strong><span class="muted"><Placeholdered text={r.detail} /></span></div></li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="container-text section prose">
+    <h2 id="payment">How payment works</h2>
+    <ol class="steps">
+      <li><strong>Send a request.</strong> Pick your dates on the Book page. We reply on WhatsApp to confirm availability, usually within <mark class="placeholder">[PLACEHOLDER: reply time]</mark>.</li>
+      <li><strong>Pay the security deposit.</strong> {L.depositPct}% of your stay total, by bank transfer or Raast. Your booking is confirmed once it arrives.</li>
+      <li><strong>Pay for your stay at check-in.</strong> The full stay price, in USD or PKR. <mark class="placeholder">[PLACEHOLDER: accepted methods at check-in]</mark></li>
+      <li><strong>Get your deposit back.</strong> We check the house after you leave and return the deposit <mark class="placeholder">[PLACEHOLDER: within how many days, and by what method]</mark>. We only keep part of it to cover damage, and we tell you what and why.</li>
+    </ol>
+
+    <h2 id="cancellation">Cancellation policy</h2>
+    <p><mark class="placeholder">[PLACEHOLDER: cancellation terms. State, with exact days: when guests get the deposit back in full, when part of it is kept, and when none of it is returned.]</mark></p>
+
+    <h2>Questions</h2>
+    <p>Message us on WhatsApp or see the <a href="/faq/">FAQ</a>.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .h { font-size: var(--type-h3-size); line-height: var(--type-h3-line); margin-bottom: var(--space-4); }
+  .rules { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--color-charcoal); }
+  .rules li { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-line); }
+  .rules li :global(svg) { flex: none; }
+  .rules div { display: flex; flex-direction: column; }
+  .rules strong { font-weight: 500; }
+  .steps { padding-left: var(--space-5); }
+  .steps li { padding-left: var(--space-2); }
+  .steps strong { font-weight: 500; }
+</style>

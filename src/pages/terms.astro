@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DHA_RETREAT as L } from '../content/listings';
+import { SITE } from '../content/site';
+---
+<BaseLayout
+  title="Booking terms"
+  description="Terms for booking a SAHA Residences home directly: requests and confirmation, the 20% security deposit, payment at check-in, guest numbers and cancellation."
+>
+  <div class="container-text page-head">
+    <span class="eyebrow">Terms</span>
+    <h1>Booking terms</h1>
+    <p class="lede">These terms apply when you book directly with {SITE.name}. <mark class="placeholder">[PLACEHOLDER: effective date, and a legal review before launch]</mark></p>
+  </div>
+  <div class="container-text section prose">
+    <h2>Requests and confirmation</h2>
+    <p>A request sent through this website is not a booking. Your booking is confirmed when we have accepted your request and received your security deposit.</p>
+
+    <h2>Prices</h2>
+    <p>Prices are shown before you send a request, in USD or PKR. For {L.name}: USD 60 per night for up to 6 guests, and PKR 1,000 per extra bedding per night for guests 7 and 8. PKR prices use one conversion rate that we show with the quote. There are no other fees unless we tell you before you confirm.</p>
+
+    <h2>Security deposit</h2>
+    <p>You pay {L.depositPct}% of the stay total as a security deposit to confirm. It is held, not spent, and returned after checkout. We only keep part of it to cover damage, missing items or extra cleaning, and we explain any deduction.</p>
+
+    <h2>Payment for your stay</h2>
+    <p>You pay the full stay price at check-in.</p>
+
+    <h2>Guests</h2>
+    <p>The number of guests may not exceed the number on your booking, and never more than {L.facts.maxGuests}. <mark class="placeholder">[PLACEHOLDER: visitor rule]</mark></p>
+
+    <h2>Cancellation</h2>
+    <p>See the <a href="/house-rules/#cancellation">cancellation policy</a>.</p>
+
+    <h2>House rules</h2>
+    <p>You agree to follow the <a href="/house-rules/">house rules</a>. We may end a stay early if they are seriously broken. <mark class="placeholder">[PLACEHOLDER: confirm wording]</mark></p>
+
+    <h2>Liability</h2>
+    <p><mark class="placeholder">[PLACEHOLDER: liability wording to be written with legal advice]</mark></p>
+  </div>
+</BaseLayout>
